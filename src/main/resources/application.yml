@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+bot:
+  name: ZeroneSocialBot
+  key: 6669420600:AAExPavK52XlqdwCShUbSM8KRZZC5TL0rCY
+
+zerone:
+  photo: https://photos.app.goo.gl/wMQkSn9fjfRDJZi38
+  welcome: Привет! Мы создали это место, чтобы вы смогли развиваться, чувствовать себя максимально комфортно в кругу приятных людей. Это сообщество профессионалов, объединённых одной идеей — с помощью кода, магия станет реальностью!
+
+http:
+  url: http://localhost:8086/api/v1
+  agent: Mozilla/5.0
