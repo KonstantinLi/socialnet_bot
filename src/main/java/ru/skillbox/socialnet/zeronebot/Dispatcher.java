@@ -6,7 +6,6 @@ import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.ExceptionHandler;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -31,8 +30,8 @@ public class Dispatcher {
                     break;
                 }
             }
-        } catch (IOException ex) {
-            exceptionHandler.handle(userRq);
+        } catch (Exception ex) {
+            exceptionHandler.handle(userRq, ex);
         }
     }
 }

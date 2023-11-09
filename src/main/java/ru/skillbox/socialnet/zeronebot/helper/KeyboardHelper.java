@@ -5,6 +5,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import ru.skillbox.socialnet.zeronebot.constant.Common;
 import ru.skillbox.socialnet.zeronebot.dto.enums.FriendShipStatus;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 
@@ -147,7 +148,7 @@ public class KeyboardHelper {
 
     public ReplyKeyboardMarkup buildMenuWithCancel() {
         KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add(CANCEL);
+        keyboardRow.add(Common.CANCEL);
 
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(keyboardRow))

@@ -13,12 +13,11 @@ import ru.skillbox.socialnet.zeronebot.dto.request.LoginRq;
 import ru.skillbox.socialnet.zeronebot.dto.request.RegisterRq;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CaptchaRs;
+import ru.skillbox.socialnet.zeronebot.dto.response.ErrorRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
+import ru.skillbox.socialnet.zeronebot.exception.BadRequestException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -102,10 +101,14 @@ public class HttpService {
         String response = get(url, token);
 
         JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
-        return OBJECT_MAPPER.readValue(
+        List<PersonRs> friends = OBJECT_MAPPER.readValue(
                 OBJECT_MAPPER.treeAsTokens(node),
                 TypeFactory.defaultInstance().constructCollectionType(List.class, PersonRs.class)
         );
+
+        return friends.stream()
+                .filter(friend -> !friend.getIsBlocked() && !friend.getUserDeleted())
+                .toList();
     }
 
     private String get(URL url) throws IOException {
@@ -123,9 +126,7 @@ public class HttpService {
         connection.setRequestProperty("User-Agent", properties.getAgent());
         connection.setRequestProperty("Authorization", token);
 
-        connection.connect();
-
-        return response(connection);
+        return connect(connection);
     }
 
     private String post(URL url, String token, Object body) throws IOException {
@@ -141,16 +142,26 @@ public class HttpService {
         out.flush();
         out.close();
 
-        connection.connect();
-
-        return response(connection);
+        return connect(connection);
     }
 
-    private String response(HttpURLConnection connection) throws IOException {
+    private String connect(HttpURLConnection connection) throws IOException {
+        try {
+            connection.connect();
+            return response(connection.getInputStream());
+        } catch (IOException ex) {
+            String error = response(connection.getErrorStream());
+            JsonNode node = OBJECT_MAPPER.readTree(error);
+            ErrorRs errorRs = OBJECT_MAPPER.treeToValue(node, ErrorRs.class);
+            throw new BadRequestException(errorRs);
+        }
+    }
+
+    private String response(InputStream inputStream) throws IOException {
         String inputLine;
         StringBuilder response = new StringBuilder();
         BufferedReader in = new BufferedReader(
-                new InputStreamReader(connection.getInputStream(),
+                new InputStreamReader(inputStream,
                         StandardCharsets.UTF_8));
 
         while ((inputLine = in.readLine()) != null) {
