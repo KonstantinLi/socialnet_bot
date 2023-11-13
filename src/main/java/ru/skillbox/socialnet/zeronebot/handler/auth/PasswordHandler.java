@@ -13,7 +13,7 @@ import ru.skillbox.socialnet.zeronebot.dto.request.LoginRq;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.helper.KeyboardHelper;
+import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.LoginSessionService;
@@ -31,7 +31,7 @@ public class PasswordHandler extends UserRequestHandler {
     private final LoginSessionService loginSessionService;
     private final RegisterSessionService registerSessionService;
 
-    private final KeyboardHelper keyboardHelper;
+    private final KeyboardService keyboardService;
 
     @Override
     public boolean isApplicable(UserRq request) {
@@ -61,7 +61,7 @@ public class PasswordHandler extends UserRequestHandler {
 
             PersonRs personRs = httpService.login(loginRq);
 
-            ReplyKeyboardMarkup replyKeyboardMarkup = keyboardHelper.buildMainMenu();
+            ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildMainMenu();
             telegramService.sendMessage(request.getChatId(),
                     "Приветствуем, "
                             + personRs.getFirstName() + " " + personRs.getLastName()
@@ -75,7 +75,7 @@ public class PasswordHandler extends UserRequestHandler {
             userSessionService.saveSession(request.getChatId(), userSession);
 
         } else if (registerSession.getRegisterState() == RegisterState.PASSWORD_WAIT) {
-            ReplyKeyboardMarkup replyKeyboardMarkup = keyboardHelper.buildMenuWithCancel();
+            ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildMenuWithCancel();
             telegramService.sendMessage(request.getChatId(),
                     "Подтвердите пароль:",
                     replyKeyboardMarkup);

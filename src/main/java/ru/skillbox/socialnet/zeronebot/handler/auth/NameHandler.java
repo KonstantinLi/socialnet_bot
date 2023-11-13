@@ -7,7 +7,7 @@ import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
 import ru.skillbox.socialnet.zeronebot.dto.enums.RegisterState;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.helper.KeyboardHelper;
+import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.RegisterSessionService;
 
@@ -19,7 +19,7 @@ public class NameHandler extends UserRequestHandler {
     private final TelegramService telegramService;
     private final RegisterSessionService registerSessionService;
 
-    private final KeyboardHelper keyboardHelper;
+    private final KeyboardService keyboardService;
 
     @Override
     public boolean isApplicable(UserRq request) {
@@ -33,7 +33,7 @@ public class NameHandler extends UserRequestHandler {
     public void handle(UserRq request) throws IOException {
         String name = request.getUpdate().getMessage().getText();
 
-        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardHelper.buildMenuWithCancel();
+        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildMenuWithCancel();
         telegramService.sendMessage(request.getChatId(),
                 "Введите свою почту:",
                 replyKeyboardMarkup);

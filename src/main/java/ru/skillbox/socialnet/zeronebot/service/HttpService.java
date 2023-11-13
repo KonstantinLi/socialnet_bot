@@ -2,6 +2,7 @@ package ru.skillbox.socialnet.zeronebot.service;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -15,6 +16,7 @@ import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CaptchaRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.ErrorRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
+import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
 import ru.skillbox.socialnet.zeronebot.exception.BadRequestException;
 
 import java.io.*;
@@ -22,6 +24,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 
 @Service
 @RequiredArgsConstructor
@@ -69,46 +73,81 @@ public class HttpService {
     }
 
     public PersonRs profile(UserRq userRq) throws IOException {
-        Long id = userRq.getUserSession().getId();
-        String token = tokenService.getToken(id);
-
         URL url = new URL(properties.getUrl() + "/users/me");
-
-        String response = get(url, token);
-
-        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
-        return OBJECT_MAPPER.treeToValue(node, PersonRs.class);
+        return getPerson(userRq, url);
     }
 
-    public PersonRs getPerson(UserRq userRq, Long personId) throws IOException {
-        Long id = userRq.getUserSession().getId();
-        String token = tokenService.getToken(id);
-
+    public PersonRs getPersonById(UserRq userRq, Long personId) throws IOException {
         URL url = new URL(properties.getUrl() + "/users/" + personId);
+        return getPerson(userRq, url);
+    }
 
-        String response = get(url, token);
+    public List<PersonRs> recommendations(UserRq userRq) throws IOException {
+        URL url = new URL(properties.getUrl() + "/friends/recommendations");
+        return getPersons(userRq, url);
+    }
 
-        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
-        return OBJECT_MAPPER.treeToValue(node, PersonRs.class);
+    public List<PersonRs> incoming(UserRq userRq) throws IOException {
+        URL url = new URL(properties.getUrl() + "/friends/request");
+        return getPersons(userRq, url);
+    }
+
+    public List<PersonRs> outgoing(UserRq userRq) throws IOException {
+        URL url = new URL(properties.getUrl() + "/friends/outgoing_requests");
+        return getPersons(userRq, url);
     }
 
     public List<PersonRs> friends(UserRq userRq) throws IOException {
-        Long id = userRq.getUserSession().getId();
-        String token = tokenService.getToken(id);
-
         URL url = new URL(properties.getUrl() + "/friends");
 
-        String response = get(url, token);
-
-        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
-        List<PersonRs> friends = OBJECT_MAPPER.readValue(
-                OBJECT_MAPPER.treeAsTokens(node),
-                TypeFactory.defaultInstance().constructCollectionType(List.class, PersonRs.class)
-        );
+        List<PersonRs> friends = getPersons(userRq, url);
 
         return friends.stream()
                 .filter(friend -> !friend.getIsBlocked() && !friend.getUserDeleted())
                 .toList();
+    }
+
+    public List<PersonRs> search(UserRq userRq) throws IOException {
+        FilterSession filterSession = userRq.getFilterSession();
+
+        Map<String, Object> filterMap =
+                OBJECT_MAPPER.convertValue(filterSession, new TypeReference<>() {});
+
+        filterMap.remove("chat_id");
+        filterMap.remove("filter_state");
+
+        StringJoiner joiner = new StringJoiner(";");
+        for (Map.Entry<String, Object> entry : filterMap.entrySet()) {
+            if (entry.getValue() != null) {
+                joiner.add(entry.getKey() + "=" + entry.getValue());
+            }
+        }
+
+        URL url = new URL(properties.getUrl() + "/users/search?" + joiner);
+        return getPersons(userRq, url);
+    }
+
+    private PersonRs getPerson(UserRq userRq, URL url) throws IOException {
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        String response = get(url, token);
+
+        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
+        return OBJECT_MAPPER.treeToValue(node, PersonRs.class);
+    }
+
+    private List<PersonRs> getPersons(UserRq userRq, URL url) throws IOException {
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        String response = get(url, token);
+
+        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
+        return OBJECT_MAPPER.readValue(
+                OBJECT_MAPPER.treeAsTokens(node),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, PersonRs.class)
+        );
     }
 
     private String get(URL url) throws IOException {

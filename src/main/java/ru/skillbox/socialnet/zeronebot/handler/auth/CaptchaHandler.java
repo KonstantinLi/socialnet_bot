@@ -9,7 +9,7 @@ import ru.skillbox.socialnet.zeronebot.dto.enums.RegisterState;
 import ru.skillbox.socialnet.zeronebot.dto.request.RegisterRq;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.helper.KeyboardHelper;
+import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.RegisterSessionService;
@@ -23,7 +23,7 @@ public class CaptchaHandler extends UserRequestHandler {
     private final TelegramService telegramService;
     private final RegisterSessionService registerSessionService;
 
-    private final KeyboardHelper keyboardHelper;
+    private final KeyboardService keyboardService;
 
     @Override
     public boolean isApplicable(UserRq request) {
@@ -59,7 +59,7 @@ public class CaptchaHandler extends UserRequestHandler {
 
         httpService.register(registerRq);
 
-        InlineKeyboardMarkup markupInLine = keyboardHelper.buildAuthMenu();
+        InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
         telegramService.sendMessage(request.getChatId(),
                 "Вы успешно зарегистрировались!",
                 markupInLine);

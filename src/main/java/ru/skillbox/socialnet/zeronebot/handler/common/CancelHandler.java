@@ -7,7 +7,7 @@ import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.LoginSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.helper.KeyboardHelper;
+import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.LoginSessionService;
 import ru.skillbox.socialnet.zeronebot.service.session.RegisterSessionService;
@@ -23,7 +23,7 @@ public class CancelHandler extends UserRequestHandler {
     private final LoginSessionService loginSessionService;
     private final RegisterSessionService registerSessionService;
 
-    private final KeyboardHelper keyboardHelper;
+    private final KeyboardService keyboardService;
 
     @Override
     public boolean isApplicable(UserRq request) {
@@ -35,7 +35,7 @@ public class CancelHandler extends UserRequestHandler {
         LoginSession loginSession = request.getLoginSession();
         RegisterSession registerSession = request.getRegisterSession();
 
-        InlineKeyboardMarkup markupInLine = keyboardHelper.buildAuthMenu();
+        InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
 
         if (loginSession.getLoginState() != null) {
             telegramService.sendMessage(

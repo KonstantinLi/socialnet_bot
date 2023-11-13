@@ -9,7 +9,7 @@ import ru.skillbox.socialnet.zeronebot.dto.enums.LoginState;
 import ru.skillbox.socialnet.zeronebot.dto.enums.RegisterState;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.helper.KeyboardHelper;
+import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.LoginSessionService;
 import ru.skillbox.socialnet.zeronebot.service.session.RegisterSessionService;
@@ -21,7 +21,7 @@ public class EmailHandler extends UserRequestHandler {
     private final LoginSessionService loginSessionService;
     private final RegisterSessionService registerSessionService;
 
-    private final KeyboardHelper keyboardHelper;
+    private final KeyboardService keyboardService;
 
     @Override
     public boolean isApplicable(UserRq request) {
@@ -38,7 +38,7 @@ public class EmailHandler extends UserRequestHandler {
         LoginSession loginSession = request.getLoginSession();
         RegisterSession registerSession = request.getRegisterSession();
 
-        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardHelper.buildMenuWithCancel();
+        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildMenuWithCancel();
         telegramService.sendMessage(request.getChatId(),
                 "Теперь введите пароль:",
                 replyKeyboardMarkup);

@@ -11,9 +11,6 @@ import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
 
 import static ru.skillbox.socialnet.zeronebot.constant.Profile.PROFILE;
 
@@ -32,7 +29,7 @@ public class ProfileHandler extends UserRequestHandler {
     @Override
     public void handle(UserRq request) throws IOException {
         PersonRs personRs = httpService.profile(request);
-        String caption = personService.caption(personRs);
+        String caption = personService.caption(personRs, true);
 
         telegramService.sendPhotoURL(request.getChatId(),
                 new URL(personRs.getPhoto()),

@@ -23,6 +23,10 @@ public abstract class UserRequestHandler {
         return update.hasMessage() && update.getMessage().hasText() && update.getMessage().getText().equals(text);
     }
 
+    public boolean isTextMessageStartsWith(Update update, String text) {
+        return update.hasMessage() && update.getMessage().hasText() && update.getMessage().getText().startsWith(text);
+    }
+
     public boolean isCallback(Update update, String text) {
         return update.hasCallbackQuery() && update.getCallbackQuery().getData().equals(text);
     }

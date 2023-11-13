@@ -1,4 +1,4 @@
-package ru.skillbox.socialnet.zeronebot.handler.account;
+package ru.skillbox.socialnet.zeronebot.handler.friends;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ public class FriendDetailsHandler extends UserRequestHandler {
                 .getData()
                 .replace(PERSON_INFO + "_", ""));
 
-        PersonRs personRs = httpService.getPerson(request, id);
+        PersonRs personRs = httpService.getPersonById(request, id);
         personService.sendPersonDetails(request, personRs);
     }
 

@@ -8,7 +8,7 @@ import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
 import ru.skillbox.socialnet.zeronebot.dto.enums.SessionState;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.helper.KeyboardHelper;
+import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.UserSessionService;
 
@@ -21,7 +21,7 @@ public class StartCommandHandler extends UserRequestHandler {
     private final TelegramService telegramService;
     private final UserSessionService userSessionService;
 
-    private final KeyboardHelper keyboardHelper;
+    private final KeyboardService keyboardService;
     private final ZeroneProperties zeroneProperties;
 
     @Override
@@ -31,7 +31,7 @@ public class StartCommandHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
-        InlineKeyboardMarkup markupInLine = keyboardHelper.buildAuthMenu();
+        InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
         telegramService.sendPhotoURL(
                 request.getChatId(),
                 new URL(zeroneProperties.getPhoto()),
