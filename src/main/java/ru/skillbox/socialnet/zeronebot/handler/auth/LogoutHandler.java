@@ -4,18 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
-import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
+import ru.skillbox.socialnet.zeronebot.dto.enums.Menu;
 import ru.skillbox.socialnet.zeronebot.dto.enums.SessionState;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
+import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.UserSessionService;
 
 import java.io.IOException;
-
-import static ru.skillbox.socialnet.zeronebot.constant.Common.LOGOUT;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +27,7 @@ public class LogoutHandler extends UserRequestHandler {
 
     @Override
     public boolean isApplicable(UserRq request) {
-        return isTextMessage(request.getUpdate(), LOGOUT);
+        return isCommand(request.getUpdate(), Menu.EXIT.getCommand());
     }
 
     @Override

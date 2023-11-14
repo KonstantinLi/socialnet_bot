@@ -3,18 +3,19 @@ package ru.skillbox.socialnet.zeronebot.handler.auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.session.LoginSession;
-import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
-import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import ru.skillbox.socialnet.zeronebot.dto.enums.LoginState;
 import ru.skillbox.socialnet.zeronebot.dto.enums.RegisterState;
 import ru.skillbox.socialnet.zeronebot.dto.enums.SessionState;
 import ru.skillbox.socialnet.zeronebot.dto.request.LoginRq;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
+import ru.skillbox.socialnet.zeronebot.dto.session.LoginSession;
+import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
+import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
+import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.LoginSessionService;
 import ru.skillbox.socialnet.zeronebot.service.session.RegisterSessionService;
@@ -61,12 +62,13 @@ public class PasswordHandler extends UserRequestHandler {
 
             PersonRs personRs = httpService.login(loginRq);
 
-            ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildMainMenu();
+            ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
+            keyboardRemove.setRemoveKeyboard(true);
             telegramService.sendMessage(request.getChatId(),
                     "Приветствуем, "
                             + personRs.getFirstName() + " " + personRs.getLastName()
                             + "!",
-                    replyKeyboardMarkup);
+                            keyboardRemove);
 
             loginSessionService.deleteSession(request.getChatId());
 

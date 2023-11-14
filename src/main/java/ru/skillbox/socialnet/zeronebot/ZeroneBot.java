@@ -1,18 +1,25 @@
 package ru.skillbox.socialnet.zeronebot;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.skillbox.socialnet.zeronebot.config.BotProperties;
+import ru.skillbox.socialnet.zeronebot.dto.enums.Menu;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.*;
 import ru.skillbox.socialnet.zeronebot.service.session.*;
 
-@Component
-@RequiredArgsConstructor
-public class ZeroneBot extends TelegramLongPollingBot {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+@Component
+public class ZeroneBot extends TelegramLongPollingBot {
     private final UserSessionService userSessionService;
     private final LoginSessionService loginSessionService;
     private final RegisterSessionService registerSessionService;
@@ -21,6 +28,29 @@ public class ZeroneBot extends TelegramLongPollingBot {
 
     private final BotProperties botProperties;
     private final Dispatcher dispatcher;
+
+    @Autowired
+    public ZeroneBot(
+            UserSessionService userSessionService,
+            LoginSessionService loginSessionService,
+            RegisterSessionService registerSessionService,
+            FriendsSessionService friendsSessionService,
+            FilterSessionService filterSessionService,
+            BotProperties botProperties,
+            Dispatcher dispatcher) {
+
+        this.userSessionService = userSessionService;
+        this.loginSessionService = loginSessionService;
+        this.registerSessionService = registerSessionService;
+        this.friendsSessionService = friendsSessionService;
+        this.filterSessionService = filterSessionService;
+        this.botProperties = botProperties;
+        this.dispatcher = dispatcher;
+
+        try {
+            execute(new SetMyCommands(commands(), new BotCommandScopeDefault(), null));
+        } catch (TelegramApiException ex) {}
+    }
 
     @Override
     public String getBotToken() {
@@ -57,7 +87,19 @@ public class ZeroneBot extends TelegramLongPollingBot {
                     .chatId(chatId)
                     .build();
 
-            dispatcher.dispatch(userRq);
+            try {
+                dispatcher.dispatch(userRq);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
+    }
+
+    private List<BotCommand> commands() {
+        List<BotCommand> commands = new ArrayList<>();
+        for (Menu command : Menu.values()) {
+            commands.add(new BotCommand(command.getCommand(), command.getText()));
+        }
+        return commands;
     }
 }

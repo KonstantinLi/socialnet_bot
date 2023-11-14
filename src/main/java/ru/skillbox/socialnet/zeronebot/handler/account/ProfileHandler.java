@@ -12,7 +12,7 @@ import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import java.io.IOException;
 import java.net.URL;
 
-import static ru.skillbox.socialnet.zeronebot.constant.Profile.PROFILE;
+import static ru.skillbox.socialnet.zeronebot.dto.enums.Menu.PROFILE;
 
 @Component
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class ProfileHandler extends UserRequestHandler {
 
     @Override
     public boolean isApplicable(UserRq request) {
-        return isTextMessage(request.getUpdate(), PROFILE);
+        return isCommand(request.getUpdate(), PROFILE.getCommand());
     }
 
     @Override

@@ -17,33 +17,15 @@ import java.util.Optional;
 
 import static ru.skillbox.socialnet.zeronebot.constant.Callback.NEXT_PERSON;
 import static ru.skillbox.socialnet.zeronebot.constant.Callback.PREV_PERSON;
-import static ru.skillbox.socialnet.zeronebot.constant.Common.*;
+import static ru.skillbox.socialnet.zeronebot.constant.Common.LOGIN;
+import static ru.skillbox.socialnet.zeronebot.constant.Common.REGISTER;
 import static ru.skillbox.socialnet.zeronebot.constant.Filter.*;
 import static ru.skillbox.socialnet.zeronebot.constant.Friends.*;
-import static ru.skillbox.socialnet.zeronebot.constant.Person.CANCEL;
 import static ru.skillbox.socialnet.zeronebot.constant.Person.DELETE;
 import static ru.skillbox.socialnet.zeronebot.constant.Person.*;
-import static ru.skillbox.socialnet.zeronebot.constant.Profile.*;
 
 @Service
 public class KeyboardService {
-    public ReplyKeyboardMarkup buildMainMenu() {
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(PROFILE);
-        row1.add(FRIENDS);
-        row1.add(MESSAGES);
-
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(LOGOUT);
-
-        return ReplyKeyboardMarkup.builder()
-                .keyboard(List.of(row1, row2))
-                .selective(true)
-                .resizeKeyboard(true)
-                .oneTimeKeyboard(false)
-                .build();
-    }
-
     public ReplyKeyboardMarkup buildFriendsMenu() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(FRIENDS_LIST);
@@ -54,11 +36,8 @@ public class KeyboardService {
         row2.add(FRIENDS_INCOMING);
         row2.add(FRIENDS_OUTGOING);
 
-        KeyboardRow row3 = new KeyboardRow();
-        row3.add(RETURN);
-
         return ReplyKeyboardMarkup.builder()
-                .keyboard(List.of(row1, row2, row3))
+                .keyboard(List.of(row1, row2))
                 .selective(true)
                 .resizeKeyboard(true)
                 .oneTimeKeyboard(false)

@@ -10,7 +10,7 @@ import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
 import java.io.IOException;
 
-import static ru.skillbox.socialnet.zeronebot.constant.Profile.FRIENDS;
+import static ru.skillbox.socialnet.zeronebot.dto.enums.Menu.FRIENDS;
 
 @Component
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ public class FriendsHandler extends UserRequestHandler {
 
     @Override
     public boolean isApplicable(UserRq request) {
-        return isTextMessage(request.getUpdate(), FRIENDS);
+        return isCommand(request.getUpdate(), FRIENDS.getCommand());
     }
 
     @Override

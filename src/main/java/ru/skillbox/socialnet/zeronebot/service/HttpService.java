@@ -116,7 +116,7 @@ public class HttpService {
         filterMap.remove("chat_id");
         filterMap.remove("filter_state");
 
-        StringJoiner joiner = new StringJoiner(";");
+        StringJoiner joiner = new StringJoiner("&");
         for (Map.Entry<String, Object> entry : filterMap.entrySet()) {
             if (entry.getValue() != null) {
                 joiner.add(entry.getKey() + "=" + entry.getValue());
