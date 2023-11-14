@@ -103,7 +103,12 @@ public class HttpService {
         List<PersonRs> friends = getPersons(userRq, url);
 
         return friends.stream()
-                .filter(friend -> !friend.getIsBlocked() && !friend.getUserDeleted())
+                .filter(friend -> {
+                    Boolean isBlocked = friend.getIsBlocked();
+                    Boolean isDeleted = friend.getUserDeleted();
+                    return (isBlocked == null || !isBlocked) &&
+                            (isDeleted == null || !isDeleted);
+                })
                 .toList();
     }
 
@@ -125,6 +130,51 @@ public class HttpService {
 
         URL url = new URL(properties.getUrl() + "/users/search?" + joiner);
         return getPersons(userRq, url);
+    }
+
+    public void sendFriendship(UserRq userRq, Long friendId) throws IOException {
+        URL url = new URL(properties.getUrl() + "/friends/" + friendId);
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        post(url, token, null);
+    }
+
+    public void addFriend(UserRq userRq, Long friendId) throws IOException {
+        URL url = new URL(properties.getUrl() + "/friends/request/" + friendId);
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        post(url, token, null);
+    }
+
+    public void declineFriendship(UserRq userRq, Long friendId) throws IOException {
+        URL url = new URL(properties.getUrl() + "/friends/request/" + friendId);
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        delete(url, token);
+    }
+
+    public void deleteFriend(UserRq userRq, Long friendId) throws IOException {
+        URL url = new URL(properties.getUrl() + "/friends/" + friendId);
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        delete(url, token);
+    }
+
+    public void blockUser(UserRq userRq, Long userId) throws IOException {
+        URL url = new URL(properties.getUrl() + "/friends/block_unblock/" + userId);
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        post(url, token, null);
     }
 
     private PersonRs getPerson(UserRq userRq, URL url) throws IOException {
@@ -159,21 +209,17 @@ public class HttpService {
     }
 
     private String get(URL url, String token) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-        connection.setRequestProperty("User-Agent", properties.getAgent());
-        connection.setRequestProperty("Authorization", token);
+        HttpURLConnection connection = connectionConfig(url, token, "GET");
+        return connect(connection);
+    }
 
+    private String delete(URL url, String token) throws IOException {
+        HttpURLConnection connection = connectionConfig(url, token, "DELETE");
         return connect(connection);
     }
 
     private String post(URL url, String token, Object body) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-        connection.setRequestProperty("User-Agent", properties.getAgent());
-        connection.setRequestProperty("Authorization", token);
+        HttpURLConnection connection = connectionConfig(url, token, "POST");
         connection.setDoOutput(true);
 
         OutputStream out = connection.getOutputStream();
@@ -194,6 +240,16 @@ public class HttpService {
             ErrorRs errorRs = OBJECT_MAPPER.treeToValue(node, ErrorRs.class);
             throw new BadRequestException(errorRs);
         }
+    }
+
+    private HttpURLConnection connectionConfig(URL url, String token, String method) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod(method);
+        connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+        connection.setRequestProperty("User-Agent", properties.getAgent());
+        connection.setRequestProperty("Authorization", token);
+
+        return connection;
     }
 
     private String response(InputStream inputStream) throws IOException {

@@ -13,7 +13,6 @@ import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static ru.skillbox.socialnet.zeronebot.constant.Callback.NEXT_PERSON;
 import static ru.skillbox.socialnet.zeronebot.constant.Callback.PREV_PERSON;
@@ -127,52 +126,55 @@ public class KeyboardService {
     }
 
     public InlineKeyboardMarkup buildPersonMenu(PersonRs person) {
+        Long id = person.getId();
+
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
 
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
 
-        InlineKeyboardButton message = new InlineKeyboardButton(MESSAGE);
-        message.setCallbackData(MESSAGE);
-        row1.add(message);
-
-        InlineKeyboardButton friendButton = null;
         String friendshipStatus = person.getFriendStatus();
 
-        if (FriendShipStatus.FRIEND.toString().equals(friendshipStatus)) {
-            friendButton = new InlineKeyboardButton(DELETE);
-            friendButton.setCallbackData(DELETE);
+        if (!FriendShipStatus.BLOCKED.toString().equals(friendshipStatus)) {
+            InlineKeyboardButton message = new InlineKeyboardButton(MESSAGE);
+            message.setCallbackData(MESSAGE + "_" + id);
+            row.add(message);
 
-        } else if (FriendShipStatus.UNKNOWN.toString().equals(friendshipStatus)) {
-            friendButton = new InlineKeyboardButton(ADD);
-            friendButton.setCallbackData(ADD);
+            InlineKeyboardButton friendButton;
 
-        } else if (FriendShipStatus.REQUEST.toString().equals(friendshipStatus)) {
-            friendButton = new InlineKeyboardButton(CANCEL);
-            friendButton.setCallbackData(CANCEL);
+            if (FriendShipStatus.FRIEND.toString().equals(friendshipStatus)) {
+                friendButton = new InlineKeyboardButton(DELETE);
+                friendButton.setCallbackData(DELETE + "_" + id);
 
-        } else if (FriendShipStatus.RECEIVED_REQUEST.toString().equals(friendshipStatus)) {
-            friendButton = new InlineKeyboardButton(CONFIRM);
-            InlineKeyboardButton rejectButton = new InlineKeyboardButton(REJECT);
+            } else if (FriendShipStatus.UNKNOWN.toString().equals(friendshipStatus)) {
+                friendButton = new InlineKeyboardButton(ADD);
+                friendButton.setCallbackData(ADD + "_" + id);
 
-            friendButton.setCallbackData(CONFIRM);
-            rejectButton.setCallbackData(REJECT);
+            } else if (FriendShipStatus.REQUEST.toString().equals(friendshipStatus)) {
+                friendButton = new InlineKeyboardButton(CANCEL);
+                friendButton.setCallbackData(CANCEL + "_" + id);
 
-            row1.add(rejectButton);
-        }
+            } else {
+                friendButton = new InlineKeyboardButton(CONFIRM);
+                InlineKeyboardButton rejectButton = new InlineKeyboardButton(DECLINE);
 
-        row1.add(friendButton);
-        rowsInLine.add(row1);
+                friendButton.setCallbackData(CONFIRM + "_" + id);
+                rejectButton.setCallbackData(DECLINE + "_" + id);
 
-        boolean isBlocked = Optional.ofNullable(person.getIsBlockedByCurrentUser()).orElse(false);
-        if (isBlocked) {
-            InlineKeyboardButton unblock = new InlineKeyboardButton(UNBLOCK);
-            unblock.setCallbackData(UNBLOCK);
-            rowsInLine.add(List.of(unblock));
-        } else {
+                row.add(rejectButton);
+            }
+
+            row.add(friendButton);
+            rowsInLine.add(row);
+
             InlineKeyboardButton block = new InlineKeyboardButton(BLOCK);
-            block.setCallbackData(BLOCK);
+            block.setCallbackData(BLOCK + "_" + id);
             rowsInLine.add(List.of(block));
+
+        } else {
+            InlineKeyboardButton unblock = new InlineKeyboardButton(UNBLOCK);
+            unblock.setCallbackData(UNBLOCK + "_" + id);
+            rowsInLine.add(List.of(unblock));
         }
 
         markupInLine.setKeyboard(rowsInLine);
