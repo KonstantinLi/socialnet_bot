@@ -5,17 +5,18 @@ import org.springframework.stereotype.Component;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
+import ru.skillbox.socialnet.zeronebot.service.MessageService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
 import java.io.IOException;
 
-import static ru.skillbox.socialnet.zeronebot.constant.Person.CONFIRM;
 import static ru.skillbox.socialnet.zeronebot.constant.Person.DECLINE;
 
 @Component
 @RequiredArgsConstructor
 public class FriendshipDeclineHandler extends UserRequestHandler {
     private final HttpService httpService;
+    private final MessageService messageService;
     private final TelegramService telegramService;
 
     @Override
@@ -25,16 +26,12 @@ public class FriendshipDeclineHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
-        Long id = Long.valueOf(request.getUpdate()
-                .getCallbackQuery()
-                .getData()
-                .replace(DECLINE + "_", ""));
-
+        Long id = messageService.getIdFromCallback(request, DECLINE);
         httpService.declineFriendship(request, id);
 
         telegramService.sendMessage(
                 request.getChatId(),
-                "Вы отклонили заявку в друзья"
+                "Вы <b>отклонили</b> заявку в друзья"
         );
     }
 

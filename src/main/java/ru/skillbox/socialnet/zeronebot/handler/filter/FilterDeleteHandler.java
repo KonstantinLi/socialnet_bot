@@ -3,7 +3,7 @@ package ru.skillbox.socialnet.zeronebot.handler.filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.enums.FilterState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.FilterState;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -29,19 +29,21 @@ public class FilterDeleteHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
+        Long chatId = request.getChatId();
+
         if (request.getFilterSession().getFilterState() != FilterState.FILTERED) {
             telegramService.sendMessage(
-                    request.getChatId(),
+                    chatId,
                     "Фильтры отсутствуют");
             return;
         }
 
-        filterSessionService.deleteSession(request.getChatId());
+        filterSessionService.deleteSession(chatId);
         FilterSession filterSession = FilterSession.builder().build();
 
         ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildFilterMenu(filterSession);
         telegramService.sendMessage(
-                request.getChatId(),
+                chatId,
                 "Фильтры успешно удалены",
                 replyKeyboardMarkup);
     }

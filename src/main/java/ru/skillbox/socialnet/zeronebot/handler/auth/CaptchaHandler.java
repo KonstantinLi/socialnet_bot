@@ -3,7 +3,7 @@ package ru.skillbox.socialnet.zeronebot.handler.auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.enums.RegisterState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.RegisterState;
 import ru.skillbox.socialnet.zeronebot.dto.request.RegisterRq;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
@@ -34,18 +34,14 @@ public class CaptchaHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
-        RegisterSession registerSession = request.getRegisterSession();
-
+        Long chatId = request.getChatId();
         String captcha = request.getUpdate().getMessage().getText();
-        String name = registerSession.getName();
 
-        RegisterRq registerRq = RegisterRq.builder()
-                .email(registerSession.getEmail())
-                .passwd1(registerSession.getPassword())
-                .passwd2(registerSession.getPasswordConfirm())
-                .codeSecret(registerSession.getCaptchaCode())
-                .code(captcha)
-                .build();
+        RegisterSession registerSession = request.getRegisterSession();
+        RegisterRq registerRq = registerSession.getRegisterRq();
+        registerRq.setCode(captcha);
+
+        String name = registerRq.getFirstName();
 
         String[] nameParts = name.split("\\b");
         if (nameParts.length == 1) {
@@ -59,11 +55,11 @@ public class CaptchaHandler extends UserRequestHandler {
 
         InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
         telegramService.sendMessage(
-                request.getChatId(),
-                "Вы успешно зарегистрировались!",
+                chatId,
+                "<b>Вы успешно зарегистрировались!</b>",
                 markupInLine);
 
-        registerSessionService.deleteSession(request.getChatId());
+        registerSessionService.deleteSession(chatId);
     }
 
     @Override

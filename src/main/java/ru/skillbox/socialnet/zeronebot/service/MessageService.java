@@ -1,6 +1,7 @@
 package ru.skillbox.socialnet.zeronebot.service;
 
 import org.springframework.stereotype.Service;
+import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 
 @Service
 public class MessageService {
@@ -67,5 +68,12 @@ public class MessageService {
             case '2', '3', '4' -> String.format("Найдены %s пользователя", numberString);
             default -> String.format("Найдено %s пользователей", numberString);
         };
+    }
+
+    public Long getIdFromCallback(UserRq request, String callback) {
+        return Long.valueOf(request.getUpdate()
+                .getCallbackQuery()
+                .getData()
+                .replace(callback + "_", ""));
     }
 }

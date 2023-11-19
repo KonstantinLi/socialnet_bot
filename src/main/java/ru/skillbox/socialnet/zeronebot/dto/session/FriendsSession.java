@@ -2,7 +2,7 @@ package ru.skillbox.socialnet.zeronebot.dto.session;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.skillbox.socialnet.zeronebot.dto.enums.FriendsState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.FriendsState;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 
 import java.util.List;

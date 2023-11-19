@@ -8,11 +8,13 @@ import ru.skillbox.socialnet.zeronebot.dto.session.*;
 @Data
 @Builder
 public class UserRq {
-    private Update update;
     private Long chatId;
+    private Update update;
     private UserSession userSession;
+    private PostSession postSession;
     private LoginSession loginSession;
-    private RegisterSession registerSession;
-    private FriendsSession friendsSession;
     private FilterSession filterSession;
+    private CommentSession commentSession;
+    private FriendsSession friendsSession;
+    private RegisterSession registerSession;
 }

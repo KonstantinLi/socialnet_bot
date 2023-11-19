@@ -1,4 +1,4 @@
-package ru.skillbox.socialnet.zeronebot.dto.enums;
+package ru.skillbox.socialnet.zeronebot.dto.enums.state;
 
 public enum SessionState {
     UNAUTHORIZED,

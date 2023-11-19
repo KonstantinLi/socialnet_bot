@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
+import ru.skillbox.socialnet.zeronebot.service.MessageService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import static ru.skillbox.socialnet.zeronebot.constant.Person.DELETE;
 @RequiredArgsConstructor
 public class FriendshipDeleteHandler extends UserRequestHandler {
     private final HttpService httpService;
+    private final MessageService messageService;
     private final TelegramService telegramService;
 
     @Override
@@ -24,16 +26,12 @@ public class FriendshipDeleteHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
-        Long id = Long.valueOf(request.getUpdate()
-                .getCallbackQuery()
-                .getData()
-                .replace(DELETE + "_", ""));
-
+        Long id = messageService.getIdFromCallback(request, DELETE);
         httpService.deleteFriend(request, id);
 
         telegramService.sendMessage(
                 request.getChatId(),
-                "Вы удалили пользователя из друзей"
+                "Вы <b>удалили</b> пользователя из друзей"
         );
     }
 

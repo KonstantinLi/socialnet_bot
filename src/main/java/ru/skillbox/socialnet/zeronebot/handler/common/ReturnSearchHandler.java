@@ -28,12 +28,15 @@ public class ReturnSearchHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
-        friendsSessionService.deleteSession(request.getChatId());
+        Long chatId = request.getChatId();
 
         ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildFriendsMenu();
-        telegramService.sendMessage(request.getChatId(),
-                "Вы вернулись во вкладку \"Друзья\"",
+        telegramService.sendMessage(
+                chatId,
+                "Вы вернулись во вкладку <b>\"Друзья\"</b>",
                 replyKeyboardMarkup);
+
+        friendsSessionService.deleteSession(chatId);
     }
 
     @Override

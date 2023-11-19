@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
-import ru.skillbox.socialnet.zeronebot.dto.enums.LoginState;
-import ru.skillbox.socialnet.zeronebot.dto.enums.RegisterState;
-import ru.skillbox.socialnet.zeronebot.dto.enums.SessionState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.LoginState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.RegisterState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.SessionState;
 import ru.skillbox.socialnet.zeronebot.dto.request.LoginRq;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
@@ -14,6 +14,7 @@ import ru.skillbox.socialnet.zeronebot.dto.session.LoginSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
+import ru.skillbox.socialnet.zeronebot.service.FormatService;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
 import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
@@ -27,12 +28,12 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class PasswordHandler extends UserRequestHandler {
     private final HttpService httpService;
+    private final FormatService formatService;
+    private final KeyboardService keyboardService;
     private final TelegramService telegramService;
     private final UserSessionService userSessionService;
     private final LoginSessionService loginSessionService;
     private final RegisterSessionService registerSessionService;
-
-    private final KeyboardService keyboardService;
 
     @Override
     public boolean isApplicable(UserRq request) {
@@ -46,45 +47,42 @@ public class PasswordHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
+        Long chatId = request.getChatId();
+        String password = request.getUpdate().getMessage().getText();
+
         UserSession userSession = request.getUserSession();
         LoginSession loginSession = request.getLoginSession();
         RegisterSession registerSession = request.getRegisterSession();
 
-        String password = request.getUpdate().getMessage().getText();
-
         if (loginSession.getLoginState() == LoginState.PASSWORD_WAIT) {
-            String email = loginSession.getEmail();
-
-            LoginRq loginRq = LoginRq.builder()
-                    .login(email)
-                    .password(password)
-                    .build();
+            LoginRq loginRq = loginSession.getLoginRq();
+            loginRq.setPassword(password);
 
             PersonRs personRs = httpService.login(loginRq);
 
             ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
             keyboardRemove.setRemoveKeyboard(true);
-            telegramService.sendMessage(request.getChatId(),
-                    "Приветствуем, "
-                            + personRs.getFirstName() + " " + personRs.getLastName()
-                            + "!",
-                            keyboardRemove);
+            telegramService.sendMessage(
+                    chatId,
+                    "Приветствуем, <b>" + formatService.getPersonName(personRs) + "</b>!",
+                    keyboardRemove);
 
-            loginSessionService.deleteSession(request.getChatId());
+            loginSessionService.deleteSession(chatId);
 
             userSession.setSessionState(SessionState.AUTHORIZED);
             userSession.setId(personRs.getId());
-            userSessionService.saveSession(request.getChatId(), userSession);
+            userSessionService.saveSession(chatId, userSession);
 
         } else if (registerSession.getRegisterState() == RegisterState.PASSWORD_WAIT) {
             ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildMenuWithCancel();
-            telegramService.sendMessage(request.getChatId(),
+            telegramService.sendMessage(
+                    chatId,
                     "Подтвердите пароль:",
                     replyKeyboardMarkup);
 
-            registerSession.setPassword(password);
+            registerSession.getRegisterRq().setPasswd1(password);
             registerSession.setRegisterState(RegisterState.PASSWORD_CONFIRM);
-            registerSessionService.saveSession(request.getChatId(), registerSession);
+            registerSessionService.saveSession(chatId, registerSession);
         }
     }
 

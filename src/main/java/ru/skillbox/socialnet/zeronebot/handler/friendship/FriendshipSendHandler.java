@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
+import ru.skillbox.socialnet.zeronebot.service.MessageService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import static ru.skillbox.socialnet.zeronebot.constant.Person.ADD;
 @RequiredArgsConstructor
 public class FriendshipSendHandler extends UserRequestHandler {
     private final HttpService httpService;
+    private final MessageService messageService;
     private final TelegramService telegramService;
 
     @Override
@@ -24,16 +26,12 @@ public class FriendshipSendHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
-        Long id = Long.valueOf(request.getUpdate()
-                .getCallbackQuery()
-                .getData()
-                .replace(ADD + "_", ""));
-
+        Long id = messageService.getIdFromCallback(request, ADD);
         httpService.sendFriendship(request, id);
 
         telegramService.sendMessage(
                 request.getChatId(),
-                "Вы отправили заявку в друзья"
+                "Вы <b>отправили</b> заявку в друзья"
         );
     }
 

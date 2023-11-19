@@ -10,7 +10,7 @@ import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
 import java.io.IOException;
 
-import static ru.skillbox.socialnet.zeronebot.dto.enums.Menu.FRIENDS;
+import static ru.skillbox.socialnet.zeronebot.constant.Menu.FRIENDS;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class FriendsHandler extends UserRequestHandler {
         ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildFriendsMenu();
         telegramService.sendMessage(
                 request.getChatId(),
-                "Вкладка \"Друзья\"",
+                "Вкладка <b>\"Друзья\"</b>",
                 replyKeyboardMarkup);
     }
 

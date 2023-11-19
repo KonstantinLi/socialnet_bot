@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Builder;
 import lombok.Data;
-import ru.skillbox.socialnet.zeronebot.dto.enums.FilterState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.FilterState;
 
 @Data
 @Builder

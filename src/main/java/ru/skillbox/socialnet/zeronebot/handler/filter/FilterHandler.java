@@ -3,7 +3,7 @@ package ru.skillbox.socialnet.zeronebot.handler.filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.skillbox.socialnet.zeronebot.dto.enums.FilterState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.FilterState;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;

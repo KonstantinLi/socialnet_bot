@@ -3,7 +3,7 @@ package ru.skillbox.socialnet.zeronebot.handler.auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.enums.LoginState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.LoginState;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.LoginSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -28,14 +28,17 @@ public class LoginHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) {
+        Long chatId = request.getChatId();
+        LoginSession loginSession = request.getLoginSession();
+
         ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildMenuWithCancel();
-        telegramService.sendMessage(request.getChatId(),
+        telegramService.sendMessage(
+                chatId,
                 "Введите свою почту:",
                 replyKeyboardMarkup);
 
-        LoginSession loginSession = request.getLoginSession();
         loginSession.setLoginState(LoginState.EMAIL_WAIT);
-        loginSessionSessionService.saveSession(request.getChatId(), loginSession);
+        loginSessionSessionService.saveSession(chatId, loginSession);
     }
 
     @Override

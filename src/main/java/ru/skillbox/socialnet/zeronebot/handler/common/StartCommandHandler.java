@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.skillbox.socialnet.zeronebot.config.ZeroneProperties;
 import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
-import ru.skillbox.socialnet.zeronebot.dto.enums.SessionState;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.SessionState;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
@@ -31,16 +31,18 @@ public class StartCommandHandler extends UserRequestHandler {
 
     @Override
     public void handle(UserRq request) throws IOException {
+        Long chatId = request.getChatId();
+
         InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
         telegramService.sendPhotoURL(
-                request.getChatId(),
+                chatId,
                 new URL(zeroneProperties.getPhoto()),
                 zeroneProperties.getWelcome(),
                 markupInLine);
 
         UserSession session = request.getUserSession();
         session.setSessionState(SessionState.UNAUTHORIZED);
-        userSessionService.saveSession(request.getChatId(), session);
+        userSessionService.saveSession(chatId, session);
     }
 
     @Override

@@ -11,8 +11,7 @@ import ru.skillbox.socialnet.zeronebot.exception.*;
 import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.TokenService;
-import ru.skillbox.socialnet.zeronebot.service.session.LoginSessionService;
-import ru.skillbox.socialnet.zeronebot.service.session.RegisterSessionService;
+import ru.skillbox.socialnet.zeronebot.service.session.*;
 
 @Component
 @Aspect
@@ -21,19 +20,27 @@ public class ExceptionAspect {
     private final TokenService tokenService;
     private final TelegramService telegramService;
     private final KeyboardService keyboardService;
+
+    private final PostSessionService postSessionService;
     private final LoginSessionService loginSessionService;
+    private final FilterSessionService filterSessionService;
+    private final CommentSessionService commentSessionService;
+    private final FriendsSessionService friendsSessionService;
     private final RegisterSessionService registerSessionService;
 
-    @Around("execution(* ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler.handle(..)) && " +
+
+    @Around("execution(* ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler.handle(" +
+            "ru.skillbox.socialnet.zeronebot.dto.request.UserRq)) && " +
             "within(ru.skillbox.socialnet.zeronebot.handler.auth..*)")
     public Object aroundAuthExceptionHandleAdvice(ProceedingJoinPoint joinPoint) {
         UserRq userRq = (UserRq) joinPoint.getArgs()[0];
 
-        InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
-
         try {
             return joinPoint.proceed();
+
         } catch (BadRequestException ex) {
+            InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
+
             if (userRq.getRegisterSession().getRegisterState() != null) {
                 telegramService.sendMessage(userRq.getChatId(),
                         "Ошибка регистрации: " + ex.getErrorRs().getErrorDescription(),
@@ -60,10 +67,10 @@ public class ExceptionAspect {
 
     @Around("execution(* ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler.handle(..)) && " +
             "(target(ru.skillbox.socialnet.zeronebot.handler.auth.LogoutHandler) || " +
-            "!within(ru.skillbox.socialnet.zeronebot.handler.auth..*))")
+            "(!target(ru.skillbox.socialnet.zeronebot.handler.common.StartCommandHandler) && " +
+            "!within(ru.skillbox.socialnet.zeronebot.handler.auth..*)))")
     public Object aroundExceptionHandleAdvice(ProceedingJoinPoint joinPoint) {
         UserRq userRq = (UserRq) joinPoint.getArgs()[0];
-
         InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
 
         try {
@@ -92,6 +99,14 @@ public class ExceptionAspect {
         } catch (Throwable ex) {
             telegramService.sendMessage(userRq.getChatId(),
                     "Возникла ошибка. Пожалуйста, попробуйте позже");
+
+            Long chatId = userRq.getChatId();
+            postSessionService.deleteSession(chatId);
+            loginSessionService.deleteSession(chatId);
+            filterSessionService.deleteSession(chatId);
+            commentSessionService.deleteSession(chatId);
+            friendsSessionService.deleteSession(chatId);
+            registerSessionService.deleteSession(chatId);
         }
 
         return null;

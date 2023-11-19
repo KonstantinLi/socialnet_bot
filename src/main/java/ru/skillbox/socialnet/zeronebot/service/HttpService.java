@@ -10,18 +10,18 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnet.zeronebot.config.HttpProperties;
-import ru.skillbox.socialnet.zeronebot.dto.request.LoginRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.RegisterRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.*;
 import ru.skillbox.socialnet.zeronebot.dto.response.CaptchaRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.ErrorRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
+import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
 import ru.skillbox.socialnet.zeronebot.exception.BadRequestException;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +109,7 @@ public class HttpService {
                     return (isBlocked == null || !isBlocked) &&
                             (isDeleted == null || !isDeleted);
                 })
+                .sorted((fr1, fr2) -> Boolean.compare(fr2.getOnline(), fr1.getOnline()))
                 .toList();
     }
 
@@ -124,7 +125,9 @@ public class HttpService {
         StringJoiner joiner = new StringJoiner("&");
         for (Map.Entry<String, Object> entry : filterMap.entrySet()) {
             if (entry.getValue() != null) {
-                joiner.add(entry.getKey() + "=" + entry.getValue());
+                String key = entry.getKey();
+                String value = entry.getValue().toString();
+                joiner.add(key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8));
             }
         }
 
@@ -177,6 +180,138 @@ public class HttpService {
         post(url, token, null);
     }
 
+    public List<PostRs> feeds(UserRq userRq, Integer offset, Integer perPage) throws IOException {
+        StringJoiner joiner = new StringJoiner("&");
+        if (offset != null) {
+            joiner.add("offset=" + offset);
+        }
+        if (perPage != null) {
+            joiner.add("perPage=" + perPage);
+        }
+
+        URL url = new URL(properties.getUrl() + "/feeds?" + joiner);
+        return getPosts(userRq, url);
+    }
+
+    public List<PostRs> myWall(UserRq userRq, Integer offset, Integer perPage) throws IOException {
+        Long id = userRq.getUserSession().getId();
+        return wall(userRq, id, offset, perPage);
+    }
+
+    public List<PostRs> wall(UserRq userRq, Long id, Integer offset, Integer perPage) throws IOException {
+        StringJoiner joiner = new StringJoiner("&");
+        if (offset != null) {
+            joiner.add("offset=" + offset);
+        }
+        if (perPage != null) {
+            joiner.add("perPage=" + perPage);
+        }
+
+        URL url = new URL(String.format(
+                "%s/users/%d/wall?%s",
+                properties.getUrl(),
+                id,
+                joiner));
+
+        return getPosts(userRq, url);
+    }
+
+    public void like(UserRq userRq, LikeRq likeRq) throws IOException {
+        URL url = new URL(properties.getUrl() + "/likes");
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        put(url, token, likeRq);
+    }
+
+    public void unlike(UserRq userRq, LikeRq likeRq) throws IOException {
+        URL url = new URL(properties.getUrl() + "/likes?" +
+                "item_id=" + likeRq.getItemId() +
+                "&type=" + likeRq.getType());
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        delete(url, token);
+    }
+
+    public void editComment(UserRq userRq,
+                            Long postId,
+                            Long commentId,
+                            CommentRq commentRq) throws IOException {
+
+        URL url = new URL(String.format(
+                "%s/post/%d/comments/%d",
+                properties.getUrl(),
+                postId,
+                commentId));
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        put(url, token, commentRq);
+    }
+
+    public void deleteComment(UserRq userRq, Long postId, Long commentId) throws IOException {
+        URL url = new URL(String.format(
+                "%s/post/%d/comments/%d",
+                properties.getUrl(),
+                postId,
+                commentId));
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        delete(url, token);
+    }
+
+    public void recoverComment(UserRq userRq, Long postId, Long commentId) throws IOException {
+        URL url = new URL(String.format(
+                "%s/post/%d/comments/%d/recover",
+                properties.getUrl(),
+                postId,
+                commentId));
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        put(url, token, null);
+    }
+
+    public void createPost(UserRq userRq, PostRq postRq) throws IOException {
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        URL url = new URL(String.format(
+                "%s/users/%d/wall",
+                properties.getUrl(),
+                id));
+
+        post(url, token, postRq);
+    }
+
+    public void deletePost(UserRq userRq, Long postId) throws IOException {
+        URL url = new URL(properties.getUrl() + "/post/" + postId);
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        delete(url, token);
+    }
+
+    public void recoverPost(UserRq userRq, Long postId) throws IOException {
+        URL url = new URL(String.format(
+                "%s/post/%d/recover",
+                properties.getUrl(),
+                postId));
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        put(url, token, null);
+    }
+
     private PersonRs getPerson(UserRq userRq, URL url) throws IOException {
         Long id = userRq.getUserSession().getId();
         String token = tokenService.getToken(id);
@@ -200,6 +335,19 @@ public class HttpService {
         );
     }
 
+    private List<PostRs> getPosts(UserRq userRq, URL url) throws IOException {
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        String response = get(url, token);
+
+        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
+        return OBJECT_MAPPER.readValue(
+                OBJECT_MAPPER.treeAsTokens(node),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, PostRs.class)
+        );
+    }
+
     private String get(URL url) throws IOException {
         return get(url, null);
     }
@@ -215,6 +363,18 @@ public class HttpService {
 
     private String delete(URL url, String token) throws IOException {
         HttpURLConnection connection = connectionConfig(url, token, "DELETE");
+        return connect(connection);
+    }
+
+    private String put(URL url, String token, Object body) throws IOException {
+        HttpURLConnection connection = connectionConfig(url, token, "PUT");
+        connection.setDoOutput(true);
+
+        OutputStream out = connection.getOutputStream();
+        out.write(serialize(body).getBytes(StandardCharsets.UTF_8));
+        out.flush();
+        out.close();
+
         return connect(connection);
     }
 

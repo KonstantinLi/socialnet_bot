@@ -31,7 +31,7 @@ public class SearchHandler extends UserRequestHandler {
         ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildFilterMenu(filterSession);
         telegramService.sendMessage(
                 request.getChatId(),
-                "Вкладка \"Глобальный поиск\"",
+                "Вкладка <b>\"Глобальный поиск\"</b>",
                 replyKeyboardMarkup);
     }
 

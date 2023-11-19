@@ -16,20 +16,18 @@ import ru.skillbox.socialnet.zeronebot.service.session.UserSessionService;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.skillbox.socialnet.zeronebot.constant.Callback.NEXT_PERSON;
-import static ru.skillbox.socialnet.zeronebot.constant.Callback.PREV_PERSON;
 import static ru.skillbox.socialnet.zeronebot.constant.Friends.PERSON_INFO;
+import static ru.skillbox.socialnet.zeronebot.constant.Navigate.NEXT_PERSON;
+import static ru.skillbox.socialnet.zeronebot.constant.Navigate.PREV_PERSON;
 
 @Service
 @RequiredArgsConstructor
 public class PersonService {
+    private final FormatService formatService;
     private final KeyboardService keyboardService;
     private final TelegramService telegramService;
     private final UserSessionService userSessionService;
@@ -60,7 +58,8 @@ public class PersonService {
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
 
         for (PersonRs person : personsPage) {
-            InlineKeyboardButton button = new InlineKeyboardButton(caption(person, false));
+            InlineKeyboardButton button =
+                    new InlineKeyboardButton(formatService.caption(person, true));
             button.setCallbackData(PERSON_INFO + "_" + person.getId());
             rowsInLine.add(List.of(button));
         }
@@ -80,7 +79,7 @@ public class PersonService {
         InlineKeyboardMarkup markupInLine = keyboardService.buildPersonMenu(person);
         telegramService.sendPhotoURL(userRq.getChatId(),
                 new URL(person.getPhoto()),
-                caption(person, true),
+                formatService.caption(person, false),
                 markupInLine);
     }
 
@@ -88,7 +87,7 @@ public class PersonService {
         InlineKeyboardMarkup markupInLine = keyboardService.buildPersonMenuNavigate(person);
         telegramService.sendPhotoURL(userRq.getChatId(),
                 new URL(person.getPhoto()),
-                caption(person, true),
+                formatService.caption(person, false),
                 markupInLine);
     }
 
@@ -141,48 +140,6 @@ public class PersonService {
         }
 
         friendsSessionService.saveSession(chatId, friendsSession);
-    }
-
-    public String caption(PersonRs personRs, boolean aboutEnable) {
-        String birthDate = personRs.getBirthDate();
-        String country = personRs.getCountry();
-        String city = personRs.getCity();
-        String about = personRs.getAbout();
-
-        StringBuilder builder = new StringBuilder();
-
-        builder.append(getName(personRs));
-
-        if (birthDate != null) {
-            builder.append(", ").append(age(birthDate));
-        }
-
-        if (city != null) {
-            builder.append(", ").append(city);
-            if (country != null) {
-                builder.append(" (").append(country).append(")");
-            }
-        } else if (country != null) {
-            builder.append(", ").append(country);
-        }
-
-        if (aboutEnable && about != null) {
-            builder.append("\n\n").append(about);
-        }
-
-        return builder.toString();
-    }
-
-    private Integer age(String birthDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        LocalDate dateOfBirth = LocalDate.parse(birthDate, formatter);
-        Period period = Period.between(dateOfBirth, LocalDate.now());
-        return period.getYears();
-    }
-
-    private String getName(PersonRs personRs) {
-        return personRs.getFirstName() +
-                (personRs.getLastName() != null ? " " + personRs.getLastName() : "");
     }
 
     public boolean isOverPage(int page, int length) {
