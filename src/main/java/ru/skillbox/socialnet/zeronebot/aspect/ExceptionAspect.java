@@ -1,6 +1,7 @@
 package ru.skillbox.socialnet.zeronebot.aspect;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -18,6 +19,7 @@ import ru.skillbox.socialnet.zeronebot.service.session.*;
 @Component
 @Aspect
 @Order(2)
+@Slf4j
 @RequiredArgsConstructor
 public class ExceptionAspect {
     private final TokenService tokenService;
@@ -66,6 +68,7 @@ public class ExceptionAspect {
             telegramService.sendMessage(chatId, "Возникла ошибка. Пожалуйста, попробуйте позже");
             loginSessionService.deleteSession(chatId);
             registerSessionService.deleteSession(chatId);
+            log.error(ex.getMessage());
         }
 
         return null;
@@ -104,6 +107,7 @@ public class ExceptionAspect {
 
         } catch (IllegalFilterException | OutOfListException ex) {
             telegramService.sendMessage(chatId, ex.getMessage());
+            log.error(ex.getMessage());
 
         } catch (Throwable ex) {
             ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
@@ -121,6 +125,7 @@ public class ExceptionAspect {
             commentSessionService.deleteSession(chatId);
             friendsSessionService.deleteSession(chatId);
             registerSessionService.deleteSession(chatId);
+            log.error(ex.getMessage());
         }
 
         return null;

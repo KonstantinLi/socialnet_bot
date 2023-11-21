@@ -78,7 +78,7 @@ public class WebSocketHandler implements StompSessionHandler {
             }
 
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            log.error(ex.getMessage());
         }
     }
 }

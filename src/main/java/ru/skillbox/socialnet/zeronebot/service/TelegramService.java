@@ -1,6 +1,7 @@
 package ru.skillbox.socialnet.zeronebot.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -17,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class TelegramService {
     private final ZeroneBotSender botSender;
@@ -40,7 +42,7 @@ public class TelegramService {
         try {
             botSender.execute(sendMessage);
         } catch (TelegramApiException ex) {
-            throw new RuntimeException(ex);
+            log.error(ex.getMessage());
         }
     }
 
@@ -61,7 +63,7 @@ public class TelegramService {
             botSender.execute(sendPhoto);
 
         } catch (TelegramApiException ex) {
-            throw new RuntimeException(ex);
+            log.error(ex.getMessage());
         }
     }
 
@@ -85,7 +87,7 @@ public class TelegramService {
             botSender.execute(sendPhoto);
 
         } catch (TelegramApiException ex) {
-            throw new RuntimeException(ex);
+            log.error(ex.getMessage());
         }
     }
 }

@@ -8,6 +8,6 @@ import redis.clients.jedis.Jedis;
 public class JedisConfig {
     @Bean
     public Jedis getJedis() {
-        return new Jedis();
+        return new Jedis("redis", 6379);
     }
 }

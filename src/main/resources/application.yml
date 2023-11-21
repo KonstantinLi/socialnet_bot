@@ -11,8 +11,8 @@ zerone:
   welcome: Привет! Мы создали это место, чтобы вы смогли развиваться, чувствовать себя максимально комфортно в кругу приятных людей. Это сообщество профессионалов, объединённых одной идеей — с помощью кода, магия станет реальностью!
 
 http:
-  url: http://${HOST}:${PORT}/api/v1
+  url: http://${BACKEND_HOST}:${BACKEND_PORT}/api/v1
   agent: Mozilla/5.0
 
 websocket:
-  url: ws://${HOST}:${PORT}/api/v1/ws
+  url: ws://${BACKEND_HOST}:${BACKEND_PORT}/api/v1/ws
