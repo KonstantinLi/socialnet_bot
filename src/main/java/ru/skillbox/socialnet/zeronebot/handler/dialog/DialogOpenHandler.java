@@ -5,8 +5,9 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import ru.skillbox.socialnet.zeronebot.constant.Dialog;
 import ru.skillbox.socialnet.zeronebot.constant.Person;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.DialogRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.DialogSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -18,8 +19,6 @@ import ru.skillbox.socialnet.zeronebot.service.session.DialogSessionService;
 
 import java.io.IOException;
 
-import static ru.skillbox.socialnet.zeronebot.constant.Dialog.MESSAGE;
-
 @Component
 @RequiredArgsConstructor
 public class DialogOpenHandler extends UserRequestHandler {
@@ -30,15 +29,15 @@ public class DialogOpenHandler extends UserRequestHandler {
     private final DialogSessionService dialogSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         Update update = request.getUpdate();
 
-        return isCallbackStartsWith(update, MESSAGE.getCommand()) ||
+        return isCallbackStartsWith(update, Dialog.MESSAGE.getCommand()) ||
                 isCallbackStartsWith(update, Person.MESSAGE.getCommand());
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         Long userId = request.getUserSession().getId();
 

@@ -6,10 +6,11 @@ import ru.skillbox.socialnet.zeronebot.dto.session.DialogSession;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class DialogSessionService {
-    private final Map<Long, DialogSession> dialogSessionMap = new HashMap<>();
+    private final Map<Long, DialogSession> dialogSessionMap = new ConcurrentHashMap<>();
 
     public DialogSession getSession(Long chatId) {
         return dialogSessionMap.getOrDefault(chatId,

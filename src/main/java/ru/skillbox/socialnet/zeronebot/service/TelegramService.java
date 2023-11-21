@@ -13,6 +13,8 @@ import ru.skillbox.socialnet.zeronebot.sender.ZeroneBotSender;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
@@ -24,8 +26,12 @@ public class TelegramService {
     }
 
     public void sendMessage(Long chatId, String message, ReplyKeyboard replyKeyboard) {
+        String regex = "<(?!/?b|/?i|/?u|/?s|/?a)[^>]*>";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(message);
+
         SendMessage sendMessage = SendMessage.builder()
-                .text(message)
+                .text(matcher.replaceAll(""))
                 .chatId(chatId.toString())
                 .parseMode(ParseMode.HTML)
                 .replyMarkup(replyKeyboard)
@@ -36,10 +42,6 @@ public class TelegramService {
         } catch (TelegramApiException ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    public void sendPhotoURL(Long chatId, URL url, String caption) {
-        sendPhotoURL(chatId, url, caption, null);
     }
 
     public void sendPhotoURL(
@@ -59,7 +61,7 @@ public class TelegramService {
             botSender.execute(sendPhoto);
 
         } catch (TelegramApiException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException(ex);
         }
     }
 
@@ -83,7 +85,7 @@ public class TelegramService {
             botSender.execute(sendPhoto);
 
         } catch (TelegramApiException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException(ex);
         }
     }
 }

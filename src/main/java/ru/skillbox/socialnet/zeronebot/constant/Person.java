@@ -11,7 +11,8 @@ public enum Person {
     DELETE("/delete_friend", "Удалить из друзей"),
     BLOCK("/block_user", "Заблокировать"),
     UNBLOCK("/unblock_user", "Разблокировать"),
-    MESSAGE("/user_message", "Написать сообщение");
+    MESSAGE("/user_message", "Написать сообщение"),
+    EDIT("/profile_edit", "Редактировать");
 
     private final String command;
     private final String text;

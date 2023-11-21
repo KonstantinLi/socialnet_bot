@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.FilterState;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.FriendsState;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.FriendsSession;
@@ -52,7 +52,7 @@ public class FilterService {
         }
     }
 
-    public void applyFilter(UserRq request) throws IOException {
+    public void applyFilter(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
 
         UserSession userSession = request.getUserSession();
@@ -70,7 +70,7 @@ public class FilterService {
         telegramService.sendMessage(chatId, messageService.search(persons.size()));
     }
 
-    public boolean hasNoFilter(UserRq request) {
+    public boolean hasNoFilter(SessionRq request) {
         Update update = request.getUpdate();
         Message message = update.getMessage();
         String callbackData = update.hasCallbackQuery() ? update.getCallbackQuery().getData() : null;

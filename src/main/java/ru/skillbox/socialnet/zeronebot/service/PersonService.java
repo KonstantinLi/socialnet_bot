@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.FriendsSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
@@ -33,23 +33,31 @@ public class PersonService {
     @Value("${zerone.page_size}")
     private Integer pageSize;
 
-    public void sendPersonDetails(UserRq userRq, PersonRs person) throws IOException {
+    public void sendPersonDetails(SessionRq sessionRq, PersonRs person) throws IOException {
+        Long chatId = sessionRq.getChatId();
+        String caption = formatService.caption(person, false);
         InlineKeyboardMarkup markupInLine = keyboardService.buildPersonMenu(person);
-        telegramService.sendPhotoURL(userRq.getChatId(),
-                new URL(person.getPhoto()),
-                formatService.caption(person, false),
-                markupInLine);
+
+        try {
+            telegramService.sendPhotoURL(chatId, new URL(person.getPhoto()), caption, markupInLine);
+        } catch (Exception ex) {
+            telegramService.sendMessage(chatId, caption, markupInLine);
+        }
     }
 
-    public void sendPersonDetailsNavigate(UserRq userRq, PersonRs person) throws IOException {
+    public void sendPersonDetailsNavigate(SessionRq sessionRq, PersonRs person) throws IOException {
+        Long chatId = sessionRq.getChatId();
+        String caption = formatService.caption(person, false);
         InlineKeyboardMarkup markupInLine = keyboardService.buildPersonMenuNavigate(person);
-        telegramService.sendPhotoURL(userRq.getChatId(),
-                new URL(person.getPhoto()),
-                formatService.caption(person, false),
-                markupInLine);
+
+        try {
+            telegramService.sendPhotoURL(chatId, new URL(person.getPhoto()), caption, markupInLine);
+        } catch (Exception ex) {
+            telegramService.sendMessage(chatId, caption, markupInLine);
+        }
     }
 
-    public void navigateButtons(UserRq request, String prevCallback, String nextCallback) {
+    public void navigateButtons(SessionRq request, String prevCallback, String nextCallback) {
         Long chatId = request.getChatId();
         Update update = request.getUpdate();
 
@@ -76,7 +84,7 @@ public class PersonService {
         userSessionService.saveSession(chatId, userSession);
     }
 
-    public void navigatePerson(UserRq request) {
+    public void navigatePerson(SessionRq request) {
         Long chatId = request.getChatId();
         Update update = request.getUpdate();
 

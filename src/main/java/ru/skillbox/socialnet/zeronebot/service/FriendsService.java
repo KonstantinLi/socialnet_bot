@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.FriendsState;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.FriendsSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
@@ -38,12 +38,12 @@ public class FriendsService {
     private Integer pageSize;
 
     public void sendPaginatedFriends(
-            UserRq userRq,
+            SessionRq sessionRq,
             List<PersonRs> personList,
             String prevPage,
             String nextPage) {
 
-        int page = Optional.ofNullable(userRq.getUserSession().getPage()).orElse(0);
+        int page = Optional.ofNullable(sessionRq.getUserSession().getPage()).orElse(0);
 
         int start = Math.min(page * pageSize, personList.size());
         int end = Math.min(start + pageSize, personList.size());
@@ -51,7 +51,7 @@ public class FriendsService {
         List<PersonRs> personsPage = personList.subList(start, end);
 
         if (personsPage.isEmpty()) {
-            telegramService.sendMessage(userRq.getChatId(), "Список завершен");
+            telegramService.sendMessage(sessionRq.getChatId(), "Список завершен");
             return;
         }
 
@@ -71,12 +71,12 @@ public class FriendsService {
         markupInLine.setKeyboard(rowsInLine);
 
         telegramService.sendMessage(
-                userRq.getChatId(),
+                sessionRq.getChatId(),
                 String.format("(%d-%d)", start + 1, end),
                 markupInLine);
     }
 
-    public void friendsList(UserRq request) throws IOException {
+    public void friendsList(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
 
         UserSession userSession = request.getUserSession();
@@ -94,7 +94,7 @@ public class FriendsService {
         telegramService.sendMessage(chatId, messageService.friends(friends.size()));
     }
 
-    public void friendsRecommend(UserRq request) throws IOException {
+    public void friendsRecommend(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         FriendsSession friendsSession = request.getFriendsSession();
 
@@ -108,7 +108,7 @@ public class FriendsService {
         telegramService.sendMessage(chatId, messageService.recommend(recommendations.size()));
     }
 
-    public void friendsRequest(UserRq request) throws IOException {
+    public void friendsRequest(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         Update update = request.getUpdate();
         Message message = update.getMessage();

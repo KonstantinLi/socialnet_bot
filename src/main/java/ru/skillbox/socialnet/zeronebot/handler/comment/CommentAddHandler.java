@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.CommentState;
 import ru.skillbox.socialnet.zeronebot.dto.request.CommentRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.CommentSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.MessageService;
@@ -25,14 +25,14 @@ public class CommentAddHandler extends UserRequestHandler {
     private final CommentSessionService commentSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         Update update = request.getUpdate();
         return isCallbackStartsWith(update, COMMENT_ADD.getCommand()) ||
                 isCallbackStartsWith(update, COMMENT_COMMENT_ADD.getCommand());
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         Update update = request.getUpdate();
 

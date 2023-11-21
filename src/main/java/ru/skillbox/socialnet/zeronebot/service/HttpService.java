@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -72,35 +71,44 @@ public class HttpService {
         return OBJECT_MAPPER.readValue(response, CaptchaRs.class);
     }
 
-    public PersonRs profile(UserRq userRq) throws IOException {
+    public PersonRs profile(SessionRq sessionRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/users/me");
-        return getPerson(userRq, url);
+        return getPerson(sessionRq, url);
     }
 
-    public PersonRs getPersonById(UserRq userRq, Long personId) throws IOException {
+    public void editProfile(SessionRq sessionRq, EditRq editRq) throws IOException {
+        URL url = new URL(properties.getUrl() + "/users/me");
+
+        Long id = sessionRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        put(url, token, editRq);
+    }
+
+    public PersonRs getPersonById(SessionRq sessionRq, Long personId) throws IOException {
         URL url = new URL(properties.getUrl() + "/users/" + personId);
-        return getPerson(userRq, url);
+        return getPerson(sessionRq, url);
     }
 
-    public List<PersonRs> recommendations(UserRq userRq) throws IOException {
+    public List<PersonRs> recommendations(SessionRq sessionRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends/recommendations");
-        return getPersons(userRq, url);
+        return getPersons(sessionRq, url);
     }
 
-    public List<PersonRs> incoming(UserRq userRq) throws IOException {
+    public List<PersonRs> incoming(SessionRq sessionRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends/request");
-        return getPersons(userRq, url);
+        return getPersons(sessionRq, url);
     }
 
-    public List<PersonRs> outgoing(UserRq userRq) throws IOException {
+    public List<PersonRs> outgoing(SessionRq sessionRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends/outgoing_requests");
-        return getPersons(userRq, url);
+        return getPersons(sessionRq, url);
     }
 
-    public List<PersonRs> friends(UserRq userRq) throws IOException {
+    public List<PersonRs> friends(SessionRq sessionRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends");
 
-        List<PersonRs> friends = getPersons(userRq, url);
+        List<PersonRs> friends = getPersons(sessionRq, url);
 
         return friends.stream()
                 .filter(friend -> {
@@ -113,8 +121,8 @@ public class HttpService {
                 .toList();
     }
 
-    public List<PersonRs> search(UserRq userRq) throws IOException {
-        FilterSession filterSession = userRq.getFilterSession();
+    public List<PersonRs> search(SessionRq sessionRq) throws IOException {
+        FilterSession filterSession = sessionRq.getFilterSession();
 
         Map<String, Object> filterMap =
                 OBJECT_MAPPER.convertValue(filterSession, new TypeReference<>() {});
@@ -132,55 +140,55 @@ public class HttpService {
         }
 
         URL url = new URL(properties.getUrl() + "/users/search?" + joiner);
-        return getPersons(userRq, url);
+        return getPersons(sessionRq, url);
     }
 
-    public void sendFriendship(UserRq userRq, Long friendId) throws IOException {
+    public void sendFriendship(SessionRq sessionRq, Long friendId) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends/" + friendId);
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         post(url, token, null);
     }
 
-    public void addFriend(UserRq userRq, Long friendId) throws IOException {
+    public void addFriend(SessionRq sessionRq, Long friendId) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends/request/" + friendId);
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         post(url, token, null);
     }
 
-    public void declineFriendship(UserRq userRq, Long friendId) throws IOException {
+    public void declineFriendship(SessionRq sessionRq, Long friendId) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends/request/" + friendId);
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         delete(url, token);
     }
 
-    public void deleteFriend(UserRq userRq, Long friendId) throws IOException {
+    public void deleteFriend(SessionRq sessionRq, Long friendId) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends/" + friendId);
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         delete(url, token);
     }
 
-    public void blockUser(UserRq userRq, Long userId) throws IOException {
+    public void blockUser(SessionRq sessionRq, Long userId) throws IOException {
         URL url = new URL(properties.getUrl() + "/friends/block_unblock/" + userId);
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         post(url, token, null);
     }
 
-    public List<PostRs> feeds(UserRq userRq, Integer offset, Integer perPage) throws IOException {
+    public List<PostRs> feeds(SessionRq sessionRq, Integer offset, Integer perPage) throws IOException {
         StringJoiner joiner = new StringJoiner("&");
         if (offset != null) {
             joiner.add("offset=" + offset);
@@ -190,15 +198,15 @@ public class HttpService {
         }
 
         URL url = new URL(properties.getUrl() + "/feeds?" + joiner);
-        return getPosts(userRq, url);
+        return getPosts(sessionRq, url);
     }
 
-    public List<PostRs> myWall(UserRq userRq, Integer offset, Integer perPage) throws IOException {
-        Long id = userRq.getUserSession().getId();
-        return wall(userRq, id, offset, perPage);
+    public List<PostRs> myWall(SessionRq sessionRq, Integer offset, Integer perPage) throws IOException {
+        Long id = sessionRq.getUserSession().getId();
+        return wall(sessionRq, id, offset, perPage);
     }
 
-    public List<PostRs> wall(UserRq userRq, Long id, Integer offset, Integer perPage) throws IOException {
+    public List<PostRs> wall(SessionRq sessionRq, Long id, Integer offset, Integer perPage) throws IOException {
         StringJoiner joiner = new StringJoiner("&");
         if (offset != null) {
             joiner.add("offset=" + offset);
@@ -213,42 +221,42 @@ public class HttpService {
                 id,
                 joiner));
 
-        return getPosts(userRq, url);
+        return getPosts(sessionRq, url);
     }
 
-    public void like(UserRq userRq, LikeRq likeRq) throws IOException {
+    public void like(SessionRq sessionRq, LikeRq likeRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/likes");
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         put(url, token, likeRq);
     }
 
-    public void unlike(UserRq userRq, LikeRq likeRq) throws IOException {
+    public void unlike(SessionRq sessionRq, LikeRq likeRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/likes?" +
                 "item_id=" + likeRq.getItemId() +
                 "&type=" + likeRq.getType());
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         delete(url, token);
     }
 
-    public void addComment(UserRq userRq, Long postId, CommentRq commentRq) throws IOException {
+    public void addComment(SessionRq sessionRq, Long postId, CommentRq commentRq) throws IOException {
         URL url = new URL(String.format(
                 "%s/post/%d/comments",
                 properties.getUrl(),
                 postId));
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         post(url, token, commentRq);
     }
 
-    public void editComment(UserRq userRq,
+    public void editComment(SessionRq sessionRq,
                             Long postId,
                             Long commentId,
                             CommentRq commentRq) throws IOException {
@@ -259,40 +267,40 @@ public class HttpService {
                 postId,
                 commentId));
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         put(url, token, commentRq);
     }
 
-    public void deleteComment(UserRq userRq, Long postId, Long commentId) throws IOException {
+    public void deleteComment(SessionRq sessionRq, Long postId, Long commentId) throws IOException {
         URL url = new URL(String.format(
                 "%s/post/%d/comments/%d",
                 properties.getUrl(),
                 postId,
                 commentId));
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         delete(url, token);
     }
 
-    public void recoverComment(UserRq userRq, Long postId, Long commentId) throws IOException {
+    public void recoverComment(SessionRq sessionRq, Long postId, Long commentId) throws IOException {
         URL url = new URL(String.format(
                 "%s/post/%d/comments/%d/recover",
                 properties.getUrl(),
                 postId,
                 commentId));
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         put(url, token, null);
     }
 
-    public void createPost(UserRq userRq, PostRq postRq) throws IOException {
-        Long id = userRq.getUserSession().getId();
+    public void createPost(SessionRq sessionRq, PostRq postRq) throws IOException {
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         URL url = new URL(String.format(
@@ -303,68 +311,68 @@ public class HttpService {
         post(url, token, postRq);
     }
 
-    public PostRs getPostById(UserRq userRq, Long postId) throws IOException {
+    public PostRs getPostById(SessionRq sessionRq, Long postId) throws IOException {
         URL url = new URL(properties.getUrl() + "/post/" + postId);
-        return getPost(userRq, url);
+        return getPost(sessionRq, url);
     }
 
-    public void deletePost(UserRq userRq, Long postId) throws IOException {
+    public void deletePost(SessionRq sessionRq, Long postId) throws IOException {
         URL url = new URL(properties.getUrl() + "/post/" + postId);
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         delete(url, token);
     }
 
-    public void recoverPost(UserRq userRq, Long postId) throws IOException {
+    public void recoverPost(SessionRq sessionRq, Long postId) throws IOException {
         URL url = new URL(String.format(
                 "%s/post/%d/recover",
                 properties.getUrl(),
                 postId));
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         put(url, token, null);
     }
 
-    public void readDialog(UserRq userRq, Long dialogId) throws IOException {
+    public void readDialog(SessionRq sessionRq, Long dialogId) throws IOException {
         URL url = new URL(String.format(
                 "%s/dialogs/%d/read",
                 properties.getUrl(),
                 dialogId));
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         put(url, token, null);
     }
 
-    public List<DialogRs> getDialogs(UserRq userRq) throws IOException {
+    public List<DialogRs> getDialogs(SessionRq sessionRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/dialogs");
-        return getDialogs(userRq, url);
+        return getDialogs(sessionRq, url);
     }
 
-    public List<MessageRs> getUnreadMessages(UserRq userRq, Long dialogId) throws IOException {
+    public List<MessageRs> getUnreadMessages(SessionRq sessionRq, Long dialogId) throws IOException {
         URL url = new URL(String.format(
                 "%s/dialogs/%d/unread",
                 properties.getUrl(),
                 dialogId));
-        return getMessages(userRq, url);
+        return getMessages(sessionRq, url);
     }
 
-    public void createDialog(UserRq userRq, DialogUserShortListRq dialogRq) throws IOException {
+    public void createDialog(SessionRq sessionRq, DialogUserShortListRq dialogRq) throws IOException {
         URL url = new URL(properties.getUrl() + "/dialogs");
 
-        Long id = userRq.getUserSession().getId();
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         post(url, token, dialogRq);
     }
 
-    private PersonRs getPerson(UserRq userRq, URL url) throws IOException {
-        Long id = userRq.getUserSession().getId();
+    private PersonRs getPerson(SessionRq sessionRq, URL url) throws IOException {
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         String response = get(url, token);
@@ -373,8 +381,8 @@ public class HttpService {
         return OBJECT_MAPPER.treeToValue(node, PersonRs.class);
     }
 
-    private List<PersonRs> getPersons(UserRq userRq, URL url) throws IOException {
-        Long id = userRq.getUserSession().getId();
+    private List<PersonRs> getPersons(SessionRq sessionRq, URL url) throws IOException {
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         String response = get(url, token);
@@ -386,8 +394,8 @@ public class HttpService {
         );
     }
 
-    private PostRs getPost(UserRq userRq, URL url) throws IOException {
-        Long id = userRq.getUserSession().getId();
+    private PostRs getPost(SessionRq sessionRq, URL url) throws IOException {
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         String response = get(url, token);
@@ -396,8 +404,8 @@ public class HttpService {
         return OBJECT_MAPPER.treeToValue(node, PostRs.class);
     }
 
-    private List<PostRs> getPosts(UserRq userRq, URL url) throws IOException {
-        Long id = userRq.getUserSession().getId();
+    private List<PostRs> getPosts(SessionRq sessionRq, URL url) throws IOException {
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         String response = get(url, token);
@@ -409,8 +417,8 @@ public class HttpService {
         );
     }
 
-    private List<DialogRs> getDialogs(UserRq userRq, URL url) throws IOException {
-        Long id = userRq.getUserSession().getId();
+    private List<DialogRs> getDialogs(SessionRq sessionRq, URL url) throws IOException {
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         String response = get(url, token);
@@ -422,8 +430,8 @@ public class HttpService {
         );
     }
 
-    private List<MessageRs> getMessages(UserRq userRq, URL url) throws IOException {
-        Long id = userRq.getUserSession().getId();
+    private List<MessageRs> getMessages(SessionRq sessionRq, URL url) throws IOException {
+        Long id = sessionRq.getUserSession().getId();
         String token = tokenService.getToken(id);
 
         String response = get(url, token);

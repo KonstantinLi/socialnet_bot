@@ -5,7 +5,7 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import ru.skillbox.socialnet.zeronebot.constant.Dialog;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.DialogSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
@@ -20,12 +20,12 @@ public class DialogCloseHandler extends UserRequestHandler {
     private final DialogSessionService dialogSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         return isTextMessage(request.getUpdate(), Dialog.CLOSE.getText());
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         DialogSession dialogSession = request.getDialogSession();
 

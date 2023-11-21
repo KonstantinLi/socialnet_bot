@@ -6,8 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.LoginState;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.RegisterState;
 import ru.skillbox.socialnet.zeronebot.dto.request.LoginRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.RegisterRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.LoginSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -25,7 +24,7 @@ public class EmailHandler extends UserRequestHandler {
     private final RegisterSessionService registerSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         LoginState loginState = request.getLoginSession().getLoginState();
         RegisterState registerState = request.getRegisterSession().getRegisterState();
 
@@ -35,7 +34,7 @@ public class EmailHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(UserRq request) {
+    public void handle(SessionRq request) {
         Long chatId = request.getChatId();
 
         LoginSession loginSession = request.getLoginSession();
@@ -46,7 +45,7 @@ public class EmailHandler extends UserRequestHandler {
                 "Теперь введите пароль:",
                 replyKeyboardMarkup);
 
-        String email = request.getUpdate().getMessage().getText();
+        String email = request.getUpdate().getMessage().getText().trim();
 
         if (loginSession.getLoginState() == LoginState.EMAIL_WAIT) {
             LoginRq loginRq = LoginRq.builder().login(email).build();

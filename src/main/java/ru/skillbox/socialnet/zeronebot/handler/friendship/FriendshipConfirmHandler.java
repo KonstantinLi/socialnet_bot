@@ -2,7 +2,7 @@ package ru.skillbox.socialnet.zeronebot.handler.friendship;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
 import ru.skillbox.socialnet.zeronebot.service.MessageService;
@@ -20,19 +20,18 @@ public class FriendshipConfirmHandler extends UserRequestHandler {
     private final TelegramService telegramService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         return isCallbackStartsWith(request.getUpdate(), CONFIRM.getCommand());
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long id = messageService.getIdFromCallback(request, CONFIRM.getCommand());
         httpService.addFriend(request, id);
 
         telegramService.sendMessage(
                 request.getChatId(),
-                "Вы <b>приняли</b> заявку в друзья"
-        );
+                "Вы <b>приняли</b> заявку в друзья");
     }
 
     @Override

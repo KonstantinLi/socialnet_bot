@@ -5,10 +5,11 @@ import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RegisterSessionService {
-    private final Map<Long, RegisterSession> registerSessionMap = new HashMap<>();
+    private final Map<Long, RegisterSession> registerSessionMap = new ConcurrentHashMap<>();
 
     public RegisterSession getSession(Long chatId) {
         return registerSessionMap.getOrDefault(chatId,

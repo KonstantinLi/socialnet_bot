@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.RegisterState;
 import ru.skillbox.socialnet.zeronebot.dto.request.RegisterRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CaptchaRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -26,7 +26,7 @@ public class PasswordConfirmHandler extends UserRequestHandler {
     private final RegisterSessionService registerSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         RegisterState registerState = request.getRegisterSession().getRegisterState();
 
         return isTextMessage(request.getUpdate()) &&
@@ -34,9 +34,9 @@ public class PasswordConfirmHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
-        String passwordConfirm = request.getUpdate().getMessage().getText();
+        String passwordConfirm = request.getUpdate().getMessage().getText().trim();
 
         CaptchaRs captchaRs = httpService.captcha();
         byte[] captchaBytes = Base64.getDecoder()

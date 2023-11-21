@@ -3,7 +3,7 @@ package ru.skillbox.socialnet.zeronebot.handler.dialog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.DialogRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.DialogSession;
@@ -26,7 +26,7 @@ public class DialogsHandler extends UserRequestHandler {
     private final DialogService dialogService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         Update update  = request.getUpdate();
 
         return isCommand(update, DIALOGS.getCommand()) ||
@@ -35,7 +35,7 @@ public class DialogsHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long id = request.getUserSession().getId();
         Update update = request.getUpdate();
         DialogSession dialogSession = request.getDialogSession();

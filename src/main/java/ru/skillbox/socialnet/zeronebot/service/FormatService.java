@@ -102,7 +102,8 @@ public class FormatService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
         String formatDateTime = formatDateTime(
                 formatter.format(messageRs.getTime()),
-                "yyyy-MM-dd'T'HH:mm:ss.SSS");
+                "yyyy-MM-dd'T'HH:mm:ss.SSS",
+                "HH:mm dd MMMM yyyy");
         Boolean sendByMe = messageRs.getIsSentByMe();
 
         StringJoiner joiner = new StringJoiner("\n");
@@ -119,18 +120,26 @@ public class FormatService {
                 (personRs.getLastName() != null ? " " + personRs.getLastName() : "");
     }
 
-    private Integer age(String birthDate) {
+    public String formatDateTime(String inputDate, String inputPattern, String outputPattern) {
+        LocalDateTime dateTime = LocalDateTime.parse(
+                inputDate,
+                DateTimeFormatter.ofPattern(inputPattern));
+
+        return dateTime.format(DateTimeFormatter.ofPattern(outputPattern));
+    }
+
+    public String formatDate(String inputDate, String inputPattern, String outputPattern) {
+        LocalDate dateTime = LocalDate.parse(
+                inputDate,
+                DateTimeFormatter.ofPattern(inputPattern));
+
+        return dateTime.atStartOfDay().format(DateTimeFormatter.ofPattern(outputPattern));
+    }
+
+    public Integer age(String birthDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDate dateOfBirth = LocalDate.parse(birthDate, formatter);
         Period period = Period.between(dateOfBirth, LocalDate.now());
         return period.getYears();
-    }
-
-    private String formatDateTime(String inputDate, String pattern) {
-        LocalDateTime dateTime = LocalDateTime.parse(
-                inputDate,
-                DateTimeFormatter.ofPattern(pattern));
-
-        return dateTime.format(DateTimeFormatter.ofPattern("HH:mm dd MMMM yyyy"));
     }
 }

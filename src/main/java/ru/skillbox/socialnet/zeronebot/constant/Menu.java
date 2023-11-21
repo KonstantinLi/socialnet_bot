@@ -8,7 +8,6 @@ public enum Menu {
     FRIENDS("/friends", "\uD83D\uDC65 Друзья"),
     DIALOGS("/dialogs", "✉\uFE0F Диалоги"),
     NEWS("/news", "\uD83D\uDCF0 Новости"),
-    SETTINGS("/settings", "⚙\uFE0F Настройки"),
     EXIT("/exit", "❌ Выйти");
 
     private final String command;

@@ -8,7 +8,7 @@ import ru.skillbox.socialnet.zeronebot.dto.enums.state.LoginState;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.RegisterState;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.SessionState;
 import ru.skillbox.socialnet.zeronebot.dto.request.LoginRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.LoginSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.RegisterSession;
@@ -36,7 +36,7 @@ public class PasswordHandler extends UserRequestHandler {
     private final RegisterSessionService registerSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         LoginState loginState = request.getLoginSession().getLoginState();
         RegisterState registerState = request.getRegisterSession().getRegisterState();
 
@@ -46,9 +46,9 @@ public class PasswordHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
-        String password = request.getUpdate().getMessage().getText();
+        String password = request.getUpdate().getMessage().getText().trim();
 
         UserSession userSession = request.getUserSession();
         LoginSession loginSession = request.getLoginSession();

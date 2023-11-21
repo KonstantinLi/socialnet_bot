@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.skillbox.socialnet.zeronebot.dto.enums.LikeType;
 import ru.skillbox.socialnet.zeronebot.dto.request.LikeRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.PostSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -27,13 +27,13 @@ public class LikePostHandler extends UserRequestHandler {
     private final MessageService messageService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         return isCallbackStartsWith(request.getUpdate(), LIKE_POST.getCommand()) ||
                 isCallbackStartsWith(request.getUpdate(), UNLIKE_POST.getCommand());
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Update update = request.getUpdate();
         PostSession postSession = request.getPostSession();
 
@@ -48,13 +48,13 @@ public class LikePostHandler extends UserRequestHandler {
                 .itemId(postId)
                 .build();
 
-        if (isCallbackStartsWith(request.getUpdate(), LIKE_POST.getCommand())) {
+        if (isCallbackStartsWith(update, LIKE_POST.getCommand())) {
             httpService.like(request, likeRq);
         } else {
             httpService.unlike(request, likeRq);
         }
 
-        postService.navigatePost(request, null);
+        postService.navigatePost(request, postSession.getAuthorId());
 
         int index = Optional.ofNullable(postSession.getIndex()).orElse(0);
         PostRs post = postSession.getPosts().get(index);

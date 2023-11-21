@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CommentRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.CommentSession;
 import ru.skillbox.socialnet.zeronebot.exception.OutOfListException;
@@ -29,12 +29,12 @@ public class CommentService {
     private final TelegramService telegramService;
     private final CommentSessionService commentSessionService;
 
-    public void navigateComment(UserRq userRq, int commentsCount) {
-        Long chatId = userRq.getChatId();
-        Update update = userRq.getUpdate();
+    public void navigateComment(SessionRq sessionRq, int commentsCount) {
+        Long chatId = sessionRq.getChatId();
+        Update update = sessionRq.getUpdate();
         String callbackData = update.getCallbackQuery().getData();
 
-        CommentSession commentSession = userRq.getCommentSession();
+        CommentSession commentSession = sessionRq.getCommentSession();
         int index = Optional.ofNullable(commentSession.getIndex()).orElse(0);
 
         if (callbackData.equals(COMMENT.getCommand())) {
@@ -54,12 +54,12 @@ public class CommentService {
         commentSessionService.saveSession(chatId, commentSession);
     }
 
-    public void navigateCommentComment(UserRq userRq, int commentsCount) {
-        Long chatId = userRq.getChatId();
-        Update update = userRq.getUpdate();
+    public void navigateCommentComment(SessionRq sessionRq, int commentsCount) {
+        Long chatId = sessionRq.getChatId();
+        Update update = sessionRq.getUpdate();
         String callbackData = update.getCallbackQuery().getData();
 
-        CommentSession commentSession = userRq.getCommentSession();
+        CommentSession commentSession = sessionRq.getCommentSession();
         int index = Optional.ofNullable(commentSession.getSubIndex()).orElse(0);
 
         if (callbackData.equals(COMMENT_COMMENT.getCommand())) {
@@ -77,18 +77,18 @@ public class CommentService {
         commentSessionService.saveSession(chatId, commentSession);
     }
 
-    public void sendCommentDetailsNavigate(UserRq userRq, CommentRs commentRs) {
-        Long id = userRq.getUserSession().getId();
+    public void sendCommentDetailsNavigate(SessionRq sessionRq, CommentRs commentRs) {
+        Long id = sessionRq.getUserSession().getId();
         InlineKeyboardMarkup markupInLine = keyboardService.buildCommentMenuNavigate(commentRs, id);
-        telegramService.sendMessage(userRq.getChatId(),
+        telegramService.sendMessage(sessionRq.getChatId(),
                 formatService.formatComment(commentRs),
                 markupInLine);
     }
 
-    public void sendCommentCommentDetailsNavigate(UserRq userRq, CommentRs commentRs) {
-        Long id = userRq.getUserSession().getId();
+    public void sendCommentCommentDetailsNavigate(SessionRq sessionRq, CommentRs commentRs) {
+        Long id = sessionRq.getUserSession().getId();
         InlineKeyboardMarkup markupInLine = keyboardService.buildCommentCommentMenuNavigate(commentRs, id);
-        telegramService.sendMessage(userRq.getChatId(),
+        telegramService.sendMessage(sessionRq.getChatId(),
                 formatService.formatComment(commentRs),
                 markupInLine);
     }

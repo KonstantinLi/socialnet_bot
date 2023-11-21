@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.FriendsState;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.FriendsSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -29,7 +29,7 @@ public class FilterApplyHandler extends UserRequestHandler {
     private final TelegramService telegramService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         Update update = request.getUpdate();
 
         return isTextMessage(request.getUpdate(), APPLY) ||
@@ -38,7 +38,7 @@ public class FilterApplyHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         Update update = request.getUpdate();
         FriendsSession friendsSession = request.getFriendsSession();

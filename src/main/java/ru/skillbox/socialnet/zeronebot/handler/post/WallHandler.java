@@ -3,7 +3,8 @@ package ru.skillbox.socialnet.zeronebot.handler.post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.PostState;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.PostSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -11,6 +12,7 @@ import ru.skillbox.socialnet.zeronebot.service.MessageService;
 import ru.skillbox.socialnet.zeronebot.service.PostService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.CommentSessionService;
+import ru.skillbox.socialnet.zeronebot.service.session.PostSessionService;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,10 +28,11 @@ public class WallHandler extends UserRequestHandler {
     private final PostService postService;
     private final MessageService messageService;
     private final TelegramService telegramService;
+    private final PostSessionService postSessionService;
     private final CommentSessionService commentSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         Update update = request.getUpdate();
 
         return isCallbackStartsWith(update, WALL.getCommand()) ||
@@ -38,7 +41,7 @@ public class WallHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         Update update = request.getUpdate();
         PostSession postSession = request.getPostSession();
@@ -53,7 +56,10 @@ public class WallHandler extends UserRequestHandler {
 
         if (command.equals(WALL.getCommand())) {
             postService.wall(request, authorId);
-            commentSessionService.deleteSession(request.getChatId());
+            postSession.setPostState(PostState.WALL);
+            postSession.setAuthorId(authorId);
+            postSessionService.saveSession(chatId, postSession);
+            commentSessionService.deleteSession(chatId);
         } else {
             postService.navigatePost(request, authorId);
         }

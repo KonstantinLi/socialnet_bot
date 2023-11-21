@@ -2,7 +2,7 @@ package ru.skillbox.socialnet.zeronebot.handler.dialog;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
 import ru.skillbox.socialnet.zeronebot.service.MessageService;
@@ -20,12 +20,12 @@ public class DialogReadHandler extends UserRequestHandler {
     private final TelegramService telegramService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         return isCallbackStartsWith(request.getUpdate(), READ.getCommand());
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long id = messageService.getIdFromCallback(request, READ.getCommand());
         httpService.readDialog(request, id);
 

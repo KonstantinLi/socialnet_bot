@@ -2,7 +2,7 @@ package ru.skillbox.socialnet.zeronebot.handler.friends;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
@@ -21,12 +21,12 @@ public class FriendDetailsHandler extends UserRequestHandler {
     private final MessageService messageService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         return isCallbackStartsWith(request.getUpdate(), PERSON_INFO);
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long id = messageService.getIdFromCallback(request, PERSON_INFO);
         PersonRs personRs = httpService.getPersonById(request, id);
         personService.sendPersonDetails(request, personRs);

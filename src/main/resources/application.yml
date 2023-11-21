@@ -7,12 +7,12 @@ bot:
 
 zerone:
   page_size: 5
-  photo: https://photos.app.goo.gl/wMQkSn9fjfRDJZi38
+  photo: https://socialnet-bucket.s3.eu-north-1.amazonaws.com/zerone.png
   welcome: Привет! Мы создали это место, чтобы вы смогли развиваться, чувствовать себя максимально комфортно в кругу приятных людей. Это сообщество профессионалов, объединённых одной идеей — с помощью кода, магия станет реальностью!
 
 http:
-  url: http://localhost:8086/api/v1
+  url: http://${HOST}:${PORT}/api/v1
   agent: Mozilla/5.0
 
 websocket:
-  url: ws://localhost:8086/api/v1/ws
+  url: ws://${HOST}:${PORT}/api/v1/ws

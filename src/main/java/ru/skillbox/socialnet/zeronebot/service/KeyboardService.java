@@ -5,12 +5,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import ru.skillbox.socialnet.zeronebot.constant.Account;
 import ru.skillbox.socialnet.zeronebot.constant.Common;
 import ru.skillbox.socialnet.zeronebot.constant.Dialog;
 import ru.skillbox.socialnet.zeronebot.constant.Filter;
 import ru.skillbox.socialnet.zeronebot.dto.enums.FriendShipStatus;
 import ru.skillbox.socialnet.zeronebot.dto.enums.ReadStatus;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CommentRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.DialogRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
@@ -86,6 +87,32 @@ public class KeyboardService {
                 .build();
     }
 
+    public ReplyKeyboardMarkup buildEditMenu() {
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(Account.FIRST_NAME);
+        row1.add(Account.LAST_NAME);
+        row1.add(Account.ABOUT);
+
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(Account.CITY);
+        row2.add(Account.COUNTRY);
+
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(Account.PHONE);
+        row3.add(Account.BIRTH_DATE);
+
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add(Account.SAVE_CHANGES);
+        row4.add(Common.CANCEL);
+
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2, row3, row4))
+                .selective(true)
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(false)
+                .build();
+    }
+
     public InlineKeyboardMarkup buildAuthMenu() {
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
@@ -104,8 +131,8 @@ public class KeyboardService {
         return markupInLine;
     }
 
-    public InlineKeyboardMarkup buildProfileMenu(UserRq userRq) {
-        Long id = userRq.getUserSession().getId();
+    public InlineKeyboardMarkup buildProfileMenu(SessionRq sessionRq) {
+        Long id = sessionRq.getUserSession().getId();
 
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
@@ -116,7 +143,11 @@ public class KeyboardService {
         InlineKeyboardButton wallButton = new InlineKeyboardButton(WALL.getText());
         wallButton.setCallbackData(WALL.getCommand() + "_" + id);
 
+        InlineKeyboardButton editButton = new InlineKeyboardButton(EDIT.getText());
+        editButton.setCallbackData(EDIT.getCommand());
+
         rowsInLine.add(List.of(postButton, wallButton));
+        rowsInLine.add(List.of(editButton));
 
         markupInLine.setKeyboard(rowsInLine);
         return markupInLine;

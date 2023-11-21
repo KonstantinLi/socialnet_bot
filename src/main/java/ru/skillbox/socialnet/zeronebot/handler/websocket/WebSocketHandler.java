@@ -45,7 +45,7 @@ public class WebSocketHandler implements StompSessionHandler {
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
         String subscribe = String.format("/user/%d/queue/messages", dialogId);
         session.subscribe(subscribe, this);
-        log.info("Websocket connected");
+        log.info(String.format("Websocket \"%s\" connected", subscribe));
     }
 
     @Override

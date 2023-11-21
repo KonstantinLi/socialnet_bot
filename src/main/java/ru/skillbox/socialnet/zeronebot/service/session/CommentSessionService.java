@@ -5,10 +5,11 @@ import ru.skillbox.socialnet.zeronebot.dto.session.CommentSession;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class CommentSessionService {
-    private final Map<Long, CommentSession> commentSessionMap = new HashMap<>();
+    private final Map<Long, CommentSession> commentSessionMap = new ConcurrentHashMap<>();
 
     public CommentSession getSession(Long chatId) {
         return commentSessionMap.getOrDefault(chatId,

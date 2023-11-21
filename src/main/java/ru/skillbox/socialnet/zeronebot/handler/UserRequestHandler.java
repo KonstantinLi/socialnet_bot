@@ -1,13 +1,13 @@
 package ru.skillbox.socialnet.zeronebot.handler;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 
 import java.io.IOException;
 
 public abstract class UserRequestHandler {
-    public abstract boolean isApplicable(UserRq request);
-    public abstract void handle(UserRq request) throws IOException;
+    public abstract boolean isApplicable(SessionRq request);
+    public abstract void handle(SessionRq request) throws IOException;
     public abstract boolean isGlobal();
 
     public boolean isCommand(Update update) {
@@ -21,6 +21,10 @@ public abstract class UserRequestHandler {
 
     public boolean isTextMessage(Update update) {
         return update.hasMessage() && update.getMessage().hasText();
+    }
+
+    public boolean isPhotoMessage(Update update) {
+        return update.hasMessage() && update.getMessage().hasPhoto();
     }
 
     public boolean isTextMessage(Update update, String text) {

@@ -2,7 +2,7 @@ package ru.skillbox.socialnet.zeronebot;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 
 import java.io.IOException;
@@ -20,10 +20,10 @@ public class Dispatcher {
                 .toList();
     }
 
-    public void dispatch(UserRq userRq) throws IOException {
+    public void dispatch(SessionRq sessionRq) throws IOException {
         for (UserRequestHandler userRequestHandler : handlers) {
-            if (userRequestHandler.isApplicable(userRq)) {
-                userRequestHandler.handle(userRq);
+            if (userRequestHandler.isApplicable(sessionRq)) {
+                userRequestHandler.handle(sessionRq);
                 break;
             }
         }

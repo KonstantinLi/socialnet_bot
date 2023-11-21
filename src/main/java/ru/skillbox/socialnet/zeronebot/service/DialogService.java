@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import ru.skillbox.socialnet.zeronebot.constant.Person;
 import ru.skillbox.socialnet.zeronebot.dto.request.DialogUserShortListRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.DialogRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.MessageRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
@@ -35,7 +35,7 @@ public class DialogService {
     private final KeyboardService keyboardService;
     private final DialogSessionService dialogSessionService;
 
-    public void dialogs(UserRq request) throws IOException {
+    public void dialogs(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         DialogSession dialogSession = request.getDialogSession();
 
@@ -56,7 +56,7 @@ public class DialogService {
                 keyboardRemove);
     }
 
-    public void navigateDialog(UserRq request) {
+    public void navigateDialog(SessionRq request) {
         Long chatId = request.getChatId();
         Update update = request.getUpdate();
 
@@ -80,20 +80,20 @@ public class DialogService {
         dialogSessionService.saveSession(chatId, dialogSession);
     }
 
-    public void openDialog(UserRq userRq, DialogRs dialogRs) throws IOException {
-        Long chatId = userRq.getChatId();
+    public void openDialog(SessionRq sessionRq, DialogRs dialogRs) throws IOException {
+        Long chatId = sessionRq.getChatId();
         Long dialogId = dialogRs.getId();
 
-        DialogSession dialogSession = userRq.getDialogSession();
+        DialogSession dialogSession = sessionRq.getDialogSession();
 
         int unreadCount = dialogRs.getUnreadCount().intValue();
         if (unreadCount > 0 && !dialogRs.getLastMessage().getIsSentByMe()) {
-            List<MessageRs> messages = httpService.getUnreadMessages(userRq, dialogId)
+            List<MessageRs> messages = httpService.getUnreadMessages(sessionRq, dialogId)
                     .stream()
                     .sorted(Comparator.comparing(MessageRs::getTime))
                     .toList();
             messages.forEach(message -> telegramService.sendMessage(chatId, message.getMessageText()));
-            httpService.readDialog(userRq, dialogId);
+            httpService.readDialog(sessionRq, dialogId);
         }
 
         StompSession oldSession = dialogSession.getStompSession();
@@ -102,33 +102,33 @@ public class DialogService {
         }
     }
 
-    public DialogRs getDialog(UserRq userRq) throws IOException {
-        Long userId = userRq.getUserSession().getId();
-        DialogSession dialogSession = userRq.getDialogSession();
+    public DialogRs getDialog(SessionRq sessionRq) throws IOException {
+        Long userId = sessionRq.getUserSession().getId();
+        DialogSession dialogSession = sessionRq.getDialogSession();
 
-        Update update = userRq.getUpdate();
+        Update update = sessionRq.getUpdate();
         String callbackData = update.getCallbackQuery().getData();
 
         DialogRs dialog;
         if (callbackData.startsWith(Person.MESSAGE.getCommand())) {
-            Long companionId = messageService.getIdFromCallback(userRq, Person.MESSAGE.getCommand());
+            Long companionId = messageService.getIdFromCallback(sessionRq, Person.MESSAGE.getCommand());
 
             DialogUserShortListRq dialogRq = new DialogUserShortListRq();
             dialogRq.setUserId(userId);
             dialogRq.setUserIds(List.of(companionId));
 
-            httpService.createDialog(userRq, dialogRq);
+            httpService.createDialog(sessionRq, dialogRq);
 
-            dialog = httpService.getDialogs(userRq)
+            dialog = httpService.getDialogs(sessionRq)
                     .stream()
                     .filter(dialog1 -> dialog1.getAuthorId().equals(companionId) ||
                             dialog1.getRecipientId().equals(companionId))
                     .findAny()
                     .orElse(null);
         } else {
-            Long dialogId = messageService.getIdFromCallback(userRq, MESSAGE.getCommand());
+            Long dialogId = messageService.getIdFromCallback(sessionRq, MESSAGE.getCommand());
             dialog = Optional.ofNullable(dialogSession.getDialogs())
-                    .orElse(httpService.getDialogs(userRq))
+                    .orElse(httpService.getDialogs(sessionRq))
                     .stream()
                     .filter(dialog1 -> dialog1.getId().equals(dialogId))
                     .findAny()

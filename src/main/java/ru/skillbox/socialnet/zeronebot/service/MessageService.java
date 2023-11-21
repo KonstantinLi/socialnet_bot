@@ -1,7 +1,7 @@
 package ru.skillbox.socialnet.zeronebot.service;
 
 import org.springframework.stereotype.Service;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 
 @Service
 public class MessageService {
@@ -44,7 +44,6 @@ public class MessageService {
         };
     }
 
-
     public String friends(int count) {
         if (count == 0) {
             return "У вас нету друзей";
@@ -57,6 +56,7 @@ public class MessageService {
             default -> String.format("У вас %s друзей", numberString);
         };
     }
+
     public String search(int count) {
         if (count == 0) {
             return "Людей не найдено по указанным фильтрам";
@@ -96,7 +96,7 @@ public class MessageService {
         };
     }
 
-    public Long getIdFromCallback(UserRq request, String callback) {
+    public Long getIdFromCallback(SessionRq request, String callback) {
         return Long.valueOf(request.getUpdate()
                 .getCallbackQuery()
                 .getData()

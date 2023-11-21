@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.PostState;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.PostSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
@@ -35,21 +36,26 @@ public class PostService {
     @Value("${zerone.page_size}")
     private Integer pageSize;
 
-    public void navigatePost(UserRq request, Long authorId) throws IOException {
+    public void navigatePost(SessionRq request, Long authorId) throws IOException {
         Long chatId = request.getChatId();
         String callbackData = request.getUpdate().getCallbackQuery().getData();
 
         UserSession userSession = request.getUserSession();
         PostSession postSession = request.getPostSession();
+        PostState postState = postSession.getPostState();
 
         int page = Optional.ofNullable(userSession.getPage()).orElse(0);
         int index = Optional.ofNullable(postSession.getIndex()).orElse(0);
 
         List<PostRs> posts = postSession.getPosts();
 
+        if (posts == null) {
+            return;
+        }
+
         if (callbackData.equals(PREV_POST) || callbackData.startsWith(PREV_USER_POST)) {
             if (index == 0 && page > 0) {
-                posts = callbackData.startsWith(PREV_USER_POST) ?
+                posts = postState == PostState.WALL ?
                         wall(request, authorId, --page) :
                         httpService.feeds(request, --page, pageSize);
 
@@ -68,7 +74,7 @@ public class PostService {
                     callbackData.startsWith(NEXT_USER_POST)) {
 
             if (++index >= posts.size()) {
-                posts = callbackData.startsWith(NEXT_USER_POST) ?
+                posts = postState == PostState.WALL ?
                         wall(request, authorId, ++page) :
                         httpService.feeds(request, ++page, pageSize);
 
@@ -90,7 +96,7 @@ public class PostService {
         postSessionService.saveSession(chatId, postSession);
     }
 
-    public void feeds(UserRq request) throws IOException {
+    public void feeds(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
 
         UserSession userSession = request.getUserSession();
@@ -106,7 +112,7 @@ public class PostService {
         userSessionService.saveSession(chatId, userSession);
     }
 
-    public void wall(UserRq request, Long authorId) throws IOException {
+    public void wall(SessionRq request, Long authorId) throws IOException {
         Long chatId = request.getChatId();
 
         UserSession userSession = request.getUserSession();
@@ -122,7 +128,7 @@ public class PostService {
         userSessionService.saveSession(chatId, userSession);
     }
 
-    private List<PostRs> wall(UserRq request, Long authorId, int page) throws IOException {
+    private List<PostRs> wall(SessionRq request, Long authorId, int page) throws IOException {
         Long id = request.getUserSession().getId();
 
         return (id.equals(authorId) ?
@@ -130,27 +136,27 @@ public class PostService {
                 httpService.wall(request, authorId, page, pageSize));
     }
 
-    public void sendPostDetailsNavigate(UserRq userRq, PostRs postRs, boolean userPost) {
+    public void sendPostDetailsNavigate(SessionRq sessionRq, PostRs postRs, boolean userPost) {
         InlineKeyboardMarkup markupInLine;
 
         if (userPost) {
             markupInLine = keyboardService.buildUserPostMenuNavigate(
                     postRs,
-                    userRq.getUserSession().getId());
+                    sessionRq.getUserSession().getId());
         } else {
             markupInLine = keyboardService.buildPostMenuNavigate(postRs);
         }
 
-        telegramService.sendMessage(userRq.getChatId(),
+        telegramService.sendMessage(sessionRq.getChatId(),
                 formatService.formatPost(postRs),
                 markupInLine);
     }
-    public PostRs getPostById(UserRq userRq, List<PostRs> posts, Long id) throws IOException {
+    public PostRs getPostById(SessionRq sessionRq, List<PostRs> posts, Long id) throws IOException {
         return Optional.ofNullable(posts)
                 .orElse(new ArrayList<>())
                 .stream()
                 .filter(post1 -> post1.getId().equals(id))
                 .findAny()
-                .orElse(httpService.getPostById(userRq, id));
+                .orElse(httpService.getPostById(sessionRq, id));
     }
 }

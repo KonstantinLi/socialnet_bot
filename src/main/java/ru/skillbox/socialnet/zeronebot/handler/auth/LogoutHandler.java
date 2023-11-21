@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import ru.skillbox.socialnet.zeronebot.constant.Menu;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.SessionState;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
@@ -25,6 +25,7 @@ public class LogoutHandler extends UserRequestHandler {
 
     private final PostSessionService postSessionService;
     private final UserSessionService userSessionService;
+    private final EditSessionService editSessionService;
     private final LoginSessionService loginSessionService;
     private final DialogSessionService dialogSessionService;
     private final FilterSessionService filterSessionService;
@@ -33,12 +34,12 @@ public class LogoutHandler extends UserRequestHandler {
     private final RegisterSessionService registerSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         return isCommand(request.getUpdate(), Menu.EXIT.getCommand());
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         UserSession session = request.getUserSession();
 
@@ -61,6 +62,7 @@ public class LogoutHandler extends UserRequestHandler {
         session.setId(null);
         userSessionService.saveSession(chatId, session);
 
+        editSessionService.deleteSession(chatId);
         postSessionService.deleteSession(chatId);
         loginSessionService.deleteSession(chatId);
         dialogSessionService.deleteSession(chatId);

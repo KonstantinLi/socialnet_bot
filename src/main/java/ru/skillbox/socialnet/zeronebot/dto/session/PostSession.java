@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public class PostSession {
     private Long chatId;
+    private Long authorId;
     private Integer index;
     private PostRq publish;
     private List<PostRs> posts;

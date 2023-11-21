@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.CommentState;
 import ru.skillbox.socialnet.zeronebot.dto.request.CommentRq;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.CommentSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.MessageService;
@@ -23,12 +23,12 @@ public class CommentEditHandler extends UserRequestHandler {
     private final CommentSessionService commentSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         return isCallbackStartsWith(request.getUpdate(), COMMENT_EDIT.getCommand());
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         if (request.getCommentSession().getPostId() == null) {
             return;
         }

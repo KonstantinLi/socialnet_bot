@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CommentRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.CommentSession;
@@ -32,7 +32,7 @@ public class CommentCommentHandler extends UserRequestHandler {
     private final CommentSessionService commentSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         Update update = request.getUpdate();
 
         return isCallbackStartsWith(update, COMMENT_COMMENT.getCommand()) ||
@@ -41,7 +41,7 @@ public class CommentCommentHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long id = request.getUserSession().getId();
         Long chatId = request.getChatId();
         Update update = request.getUpdate();

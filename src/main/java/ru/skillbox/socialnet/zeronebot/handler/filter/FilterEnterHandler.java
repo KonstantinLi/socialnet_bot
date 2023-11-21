@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import ru.skillbox.socialnet.zeronebot.dto.enums.state.FilterState;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
 import ru.skillbox.socialnet.zeronebot.exception.IllegalFilterException;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -24,7 +24,7 @@ public class FilterEnterHandler extends UserRequestHandler {
     private final FilterSessionService filterSessionService;
 
     @Override
-    public boolean isApplicable(UserRq request) {
+    public boolean isApplicable(SessionRq request) {
         FilterState filterState = request.getFilterSession().getFilterState();
         return filterState != null &&
                 filterState != FilterState.FILTERED &&
@@ -32,7 +32,7 @@ public class FilterEnterHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(UserRq request) throws IOException {
+    public void handle(SessionRq request) throws IOException {
         Long chatId = request.getChatId();
         String message = request.getUpdate().getMessage().getText();
 

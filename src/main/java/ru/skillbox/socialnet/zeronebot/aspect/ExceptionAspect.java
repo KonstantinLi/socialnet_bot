@@ -7,7 +7,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.exception.*;
 import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
@@ -23,6 +24,7 @@ public class ExceptionAspect {
     private final TelegramService telegramService;
     private final KeyboardService keyboardService;
 
+    private final EditSessionService editSessionService;
     private final PostSessionService postSessionService;
     private final LoginSessionService loginSessionService;
     private final DialogSessionService dialogSessionService;
@@ -33,10 +35,11 @@ public class ExceptionAspect {
 
 
     @Around("execution(* ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler.handle(" +
-            "ru.skillbox.socialnet.zeronebot.dto.request.UserRq)) && " +
+            "ru.skillbox.socialnet.zeronebot.dto.request.SessionRq)) && " +
             "within(ru.skillbox.socialnet.zeronebot.handler.auth..*)")
     public Object aroundAuthExceptionHandleAdvice(ProceedingJoinPoint joinPoint) {
-        UserRq userRq = (UserRq) joinPoint.getArgs()[0];
+        SessionRq sessionRq = (SessionRq) joinPoint.getArgs()[0];
+        Long chatId = sessionRq.getChatId();
 
         try {
             return joinPoint.proceed();
@@ -44,67 +47,73 @@ public class ExceptionAspect {
         } catch (BadRequestException ex) {
             InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
 
-            if (userRq.getRegisterSession().getRegisterState() != null) {
-                telegramService.sendMessage(userRq.getChatId(),
+            if (sessionRq.getRegisterSession().getRegisterState() != null) {
+                telegramService.sendMessage(
+                        chatId,
                         "Ошибка регистрации: " + ex.getErrorRs().getErrorDescription(),
                         markupInLine);
             } else {
-                telegramService.sendMessage(userRq.getChatId(),
+                telegramService.sendMessage(
+                        chatId,
                         "Ошибка авторизации: " + ex.getErrorRs().getErrorDescription(),
                         markupInLine);
             }
 
-            loginSessionService.deleteSession(userRq.getChatId());
-            registerSessionService.deleteSession(userRq.getChatId());
+            loginSessionService.deleteSession(chatId);
+            registerSessionService.deleteSession(chatId);
 
         } catch (Throwable ex) {
-            telegramService.sendMessage(userRq.getChatId(),
-                    "Возникла ошибка. Пожалуйста, попробуйте позже");
-
-            loginSessionService.deleteSession(userRq.getChatId());
-            registerSessionService.deleteSession(userRq.getChatId());
+            telegramService.sendMessage(chatId, "Возникла ошибка. Пожалуйста, попробуйте позже");
+            loginSessionService.deleteSession(chatId);
+            registerSessionService.deleteSession(chatId);
         }
 
         return null;
     }
 
     @Around("execution(* ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler.handle(" +
-            "ru.skillbox.socialnet.zeronebot.dto.request.UserRq)) && " +
+            "ru.skillbox.socialnet.zeronebot.dto.request.SessionRq)) && " +
             "(target(ru.skillbox.socialnet.zeronebot.handler.auth.LogoutHandler) || " +
             "(!target(ru.skillbox.socialnet.zeronebot.handler.common.StartCommandHandler) && " +
             "!within(ru.skillbox.socialnet.zeronebot.handler.auth..*)))")
     public Object aroundExceptionHandleAdvice(ProceedingJoinPoint joinPoint) {
-        UserRq userRq = (UserRq) joinPoint.getArgs()[0];
+        SessionRq sessionRq = (SessionRq) joinPoint.getArgs()[0];
+        Long chatId = sessionRq.getChatId();
+
         InlineKeyboardMarkup markupInLine = keyboardService.buildAuthMenu();
 
         try {
-            tokenService.getToken(userRq.getUserSession().getId());
+            tokenService.getToken(sessionRq.getUserSession().getId());
             return joinPoint.proceed();
 
         } catch (IdException | TokenException ex) {
             telegramService.sendMessage(
-                    userRq.getChatId(),
+                    chatId,
                     "Вы не авторизованы",
                     markupInLine);
 
         } catch (BadRequestException ex) {
-            if (userRq.getRegisterSession().getRegisterState() != null) {
-                telegramService.sendMessage(userRq.getChatId(),
+            if (sessionRq.getRegisterSession().getRegisterState() != null) {
+                telegramService.sendMessage(
+                        chatId,
                         ex.getErrorRs().getErrorDescription(),
                         markupInLine);
             } else {
-                telegramService.sendMessage(userRq.getChatId(),
-                        ex.getErrorRs().getErrorDescription());
+                telegramService.sendMessage(chatId, ex.getErrorRs().getErrorDescription());
             }
 
         } catch (IllegalFilterException | OutOfListException ex) {
-            telegramService.sendMessage(userRq.getChatId(), ex.getMessage());
+            telegramService.sendMessage(chatId, ex.getMessage());
 
         } catch (Throwable ex) {
-            telegramService.sendMessage(userRq.getChatId(),
-                    "Возникла ошибка. Пожалуйста, попробуйте позже");
+            ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
+            keyboardRemove.setRemoveKeyboard(true);
+            telegramService.sendMessage(
+                    chatId,
+                    "Возникла ошибка. Пожалуйста, попробуйте позже",
+                    keyboardRemove);
 
-            Long chatId = userRq.getChatId();
+            editSessionService.deleteSession(chatId);
             postSessionService.deleteSession(chatId);
             loginSessionService.deleteSession(chatId);
             dialogSessionService.deleteSession(chatId);
