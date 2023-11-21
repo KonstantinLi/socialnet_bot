@@ -3,16 +3,14 @@ package ru.skillbox.socialnet.zeronebot.handler.comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CommentRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.CommentSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.PostSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.service.CommentService;
-import ru.skillbox.socialnet.zeronebot.service.MessageService;
-import ru.skillbox.socialnet.zeronebot.service.PostService;
-import ru.skillbox.socialnet.zeronebot.service.TelegramService;
+import ru.skillbox.socialnet.zeronebot.service.*;
 import ru.skillbox.socialnet.zeronebot.service.session.CommentSessionService;
 
 import java.io.IOException;
@@ -29,6 +27,7 @@ public class CommentCommentHandler extends UserRequestHandler {
     private final PostService postService;
     private final CommentService commentService;
     private final MessageService messageService;
+    private final KeyboardService keyboardService;
     private final TelegramService telegramService;
     private final CommentSessionService commentSessionService;
 
@@ -55,7 +54,7 @@ public class CommentCommentHandler extends UserRequestHandler {
                 messageService.getIdFromCallback(request, COMMENT_COMMENT.getCommand()) :
                 commentSession.getParentId();
 
-        PostRs post = postService.getPostById(postSession.getPosts(), postId);
+        PostRs post = postService.getPostById(request, postSession.getPosts(), postId);
         CommentRs parentComment = commentService.getCommentById(post.getComments(), parentId);
 
         List<CommentRs> comments = parentComment.getSubComments()
@@ -63,16 +62,20 @@ public class CommentCommentHandler extends UserRequestHandler {
                 .sorted(commentService.commentComparator(id))
                 .toList();
 
+        InlineKeyboardMarkup markupInLine = keyboardService.buildCommentCommentAddMenu(parentComment);
+
         if (comments.isEmpty()) {
             telegramService.sendMessage(
                     chatId,
-                    "<b>Вложенные комментарии отсутствуют</b>");
+                    "<b>Вложенные комментарии отсутствуют</b>",
+                    markupInLine);
             return;
 
         } else if (isCallbackStartsWith(update, COMMENT_COMMENT.getCommand())) {
             telegramService.sendMessage(
                     chatId,
-                    "<b>Вложенные комментарии</b>");
+                    "<b>Вложенные комментарии</b>",
+                    markupInLine);
             commentSession.setSubIndex(0);
             commentSession.setParentId(parentId);
 

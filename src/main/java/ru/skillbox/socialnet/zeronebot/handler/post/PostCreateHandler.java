@@ -13,7 +13,7 @@ import ru.skillbox.socialnet.zeronebot.service.session.PostSessionService;
 
 import java.io.IOException;
 
-import static ru.skillbox.socialnet.zeronebot.constant.Menu.POST;
+import static ru.skillbox.socialnet.zeronebot.constant.Post.POST_ADD;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class PostCreateHandler extends UserRequestHandler {
 
     @Override
     public boolean isApplicable(UserRq request) {
-        return isCommand(request.getUpdate(), POST.getCommand());
+        return isCallback(request.getUpdate(), POST_ADD.getCommand());
     }
 
     @Override

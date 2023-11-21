@@ -13,6 +13,7 @@ public class UserRq {
     private UserSession userSession;
     private PostSession postSession;
     private LoginSession loginSession;
+    private DialogSession dialogSession;
     private FilterSession filterSession;
     private CommentSession commentSession;
     private FriendsSession friendsSession;

@@ -15,7 +15,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class CommentEditEnterHandler extends UserRequestHandler {
+public class CommentAddEnterHandler extends UserRequestHandler {
     private final HttpService httpService;
     private final TelegramService telegramService;
     private final CommentSessionService commentSessionService;
@@ -23,7 +23,7 @@ public class CommentEditEnterHandler extends UserRequestHandler {
     @Override
     public boolean isApplicable(UserRq request) {
         return isTextMessage(request.getUpdate()) &&
-            request.getCommentSession().getCommentState() == CommentState.EDITING;
+                request.getCommentSession().getCommentState() == CommentState.ADDING;
     }
 
     @Override
@@ -32,21 +32,18 @@ public class CommentEditEnterHandler extends UserRequestHandler {
         String text = request.getUpdate().getMessage().getText();
 
         CommentSession commentSession = request.getCommentSession();
-        CommentRq commentRq = commentSession.getComment();
-
         Long postId = commentSession.getPostId();
-        Long commentId = commentRq.getId();
 
-        commentRq.setId(null);
+        CommentRq commentRq = commentSession.getComment();
         commentRq.setCommentText(text);
 
-        httpService.editComment(request, postId, commentId, commentRq);
+        httpService.addComment(request, postId, commentRq);
 
         commentSession.setCommentState(null);
         commentSession.setComment(null);
         commentSessionService.saveSession(chatId, commentSession);
 
-        telegramService.sendMessage(chatId, "<b>Комментарий отредактирован</b>");
+        telegramService.sendMessage(chatId, "<b>Комментарий добавлен</b>");
     }
 
     @Override

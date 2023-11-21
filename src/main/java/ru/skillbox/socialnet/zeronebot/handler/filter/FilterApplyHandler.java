@@ -9,6 +9,7 @@ import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.FriendsSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.FilterService;
+import ru.skillbox.socialnet.zeronebot.service.FriendsService;
 import ru.skillbox.socialnet.zeronebot.service.PersonService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
@@ -24,6 +25,7 @@ import static ru.skillbox.socialnet.zeronebot.constant.Navigate.PREV_PAGE_SEARCH
 public class FilterApplyHandler extends UserRequestHandler {
     private final PersonService personService;
     private final FilterService filterService;
+    private final FriendsService friendsService;
     private final TelegramService telegramService;
 
     @Override
@@ -61,7 +63,7 @@ public class FilterApplyHandler extends UserRequestHandler {
             return;
         }
 
-        personService.sendPaginatedFriends(
+        friendsService.sendPaginatedFriends(
                 request,
                 persons,
                 PREV_PAGE_SEARCH,

@@ -1,4 +1,4 @@
-package ru.skillbox.socialnet.zeronebot.handler.friendship;
+package ru.skillbox.socialnet.zeronebot.handler.dialog;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -10,29 +10,28 @@ import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
 import java.io.IOException;
 
-import static ru.skillbox.socialnet.zeronebot.constant.Person.CONFIRM;
+import static ru.skillbox.socialnet.zeronebot.constant.Dialog.READ;
 
 @Component
 @RequiredArgsConstructor
-public class FriendshipConfirmHandler extends UserRequestHandler {
+public class DialogReadHandler extends UserRequestHandler {
     private final HttpService httpService;
     private final MessageService messageService;
     private final TelegramService telegramService;
 
     @Override
     public boolean isApplicable(UserRq request) {
-        return isCallbackStartsWith(request.getUpdate(), CONFIRM.getCommand());
+        return isCallbackStartsWith(request.getUpdate(), READ.getCommand());
     }
 
     @Override
     public void handle(UserRq request) throws IOException {
-        Long id = messageService.getIdFromCallback(request, CONFIRM.getCommand());
-        httpService.addFriend(request, id);
+        Long id = messageService.getIdFromCallback(request, READ.getCommand());
+        httpService.readDialog(request, id);
 
         telegramService.sendMessage(
                 request.getChatId(),
-                "Вы <b>приняли</b> заявку в друзья"
-        );
+                "Вы отметили диалог как <b>прочитанный</b>");
     }
 
     @Override

@@ -145,15 +145,12 @@ public class PostService {
                 formatService.formatPost(postRs),
                 markupInLine);
     }
-
-    public PostRs getPostById(List<PostRs> posts, Long id) {
-        return posts.stream()
+    public PostRs getPostById(UserRq userRq, List<PostRs> posts, Long id) throws IOException {
+        return Optional.ofNullable(posts)
+                .orElse(new ArrayList<>())
+                .stream()
                 .filter(post1 -> post1.getId().equals(id))
                 .findAny()
-                .orElseGet(() -> {
-                    PostRs post1 = new PostRs();
-                    post1.setComments(new ArrayList<>());
-                    return post1;
-                });
+                .orElse(httpService.getPostById(userRq, id));
     }
 }

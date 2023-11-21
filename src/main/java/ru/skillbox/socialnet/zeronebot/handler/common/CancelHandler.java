@@ -3,6 +3,7 @@ package ru.skillbox.socialnet.zeronebot.handler.common;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.LoginSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.PostSession;
@@ -58,7 +59,12 @@ public class CancelHandler extends UserRequestHandler {
             registerSessionService.deleteSession(chatId);
 
         } else if (postSession.getPostState() != null) {
-            telegramService.sendMessage(chatId, "Вы прервали создание поста");
+            ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
+            keyboardRemove.setRemoveKeyboard(true);
+            telegramService.sendMessage(
+                    chatId,
+                    "Вы прервали создание поста",
+                    keyboardRemove);
             postSessionService.deleteSession(chatId);
         }
     }

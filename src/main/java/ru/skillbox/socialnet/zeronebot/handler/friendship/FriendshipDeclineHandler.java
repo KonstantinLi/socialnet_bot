@@ -21,12 +21,12 @@ public class FriendshipDeclineHandler extends UserRequestHandler {
 
     @Override
     public boolean isApplicable(UserRq request) {
-        return isCallbackStartsWith(request.getUpdate(), DECLINE);
+        return isCallbackStartsWith(request.getUpdate(), DECLINE.getCommand());
     }
 
     @Override
     public void handle(UserRq request) throws IOException {
-        Long id = messageService.getIdFromCallback(request, DECLINE);
+        Long id = messageService.getIdFromCallback(request, DECLINE.getCommand());
         httpService.declineFriendship(request, id);
 
         telegramService.sendMessage(

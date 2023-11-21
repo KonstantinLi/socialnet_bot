@@ -10,6 +10,10 @@ public abstract class UserRequestHandler {
     public abstract void handle(UserRq request) throws IOException;
     public abstract boolean isGlobal();
 
+    public boolean isCommand(Update update) {
+        return update.hasMessage() && update.getMessage().isCommand();
+    }
+
     public boolean isCommand(Update update, String command) {
         return update.hasMessage() && update.getMessage().isCommand()
                 && update.getMessage().getText().equals(command);

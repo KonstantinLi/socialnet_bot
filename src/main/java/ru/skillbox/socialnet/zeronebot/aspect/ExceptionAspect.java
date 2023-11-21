@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
@@ -15,6 +16,7 @@ import ru.skillbox.socialnet.zeronebot.service.session.*;
 
 @Component
 @Aspect
+@Order(2)
 @RequiredArgsConstructor
 public class ExceptionAspect {
     private final TokenService tokenService;
@@ -23,6 +25,7 @@ public class ExceptionAspect {
 
     private final PostSessionService postSessionService;
     private final LoginSessionService loginSessionService;
+    private final DialogSessionService dialogSessionService;
     private final FilterSessionService filterSessionService;
     private final CommentSessionService commentSessionService;
     private final FriendsSessionService friendsSessionService;
@@ -65,7 +68,8 @@ public class ExceptionAspect {
         return null;
     }
 
-    @Around("execution(* ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler.handle(..)) && " +
+    @Around("execution(* ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler.handle(" +
+            "ru.skillbox.socialnet.zeronebot.dto.request.UserRq)) && " +
             "(target(ru.skillbox.socialnet.zeronebot.handler.auth.LogoutHandler) || " +
             "(!target(ru.skillbox.socialnet.zeronebot.handler.common.StartCommandHandler) && " +
             "!within(ru.skillbox.socialnet.zeronebot.handler.auth..*)))")
@@ -103,6 +107,7 @@ public class ExceptionAspect {
             Long chatId = userRq.getChatId();
             postSessionService.deleteSession(chatId);
             loginSessionService.deleteSession(chatId);
+            dialogSessionService.deleteSession(chatId);
             filterSessionService.deleteSession(chatId);
             commentSessionService.deleteSession(chatId);
             friendsSessionService.deleteSession(chatId);

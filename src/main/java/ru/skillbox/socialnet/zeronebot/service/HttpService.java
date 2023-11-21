@@ -7,14 +7,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnet.zeronebot.config.HttpProperties;
 import ru.skillbox.socialnet.zeronebot.dto.request.*;
-import ru.skillbox.socialnet.zeronebot.dto.response.CaptchaRs;
-import ru.skillbox.socialnet.zeronebot.dto.response.ErrorRs;
-import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
-import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
+import ru.skillbox.socialnet.zeronebot.dto.response.*;
 import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
 import ru.skillbox.socialnet.zeronebot.exception.BadRequestException;
 
@@ -26,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +33,7 @@ public class HttpService {
 
     static {
         OBJECT_MAPPER.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true);
+        OBJECT_MAPPER.registerModule(new JavaTimeModule());
     }
 
     private final HttpProperties properties;
@@ -236,6 +236,18 @@ public class HttpService {
         delete(url, token);
     }
 
+    public void addComment(UserRq userRq, Long postId, CommentRq commentRq) throws IOException {
+        URL url = new URL(String.format(
+                "%s/post/%d/comments",
+                properties.getUrl(),
+                postId));
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        post(url, token, commentRq);
+    }
+
     public void editComment(UserRq userRq,
                             Long postId,
                             Long commentId,
@@ -291,6 +303,11 @@ public class HttpService {
         post(url, token, postRq);
     }
 
+    public PostRs getPostById(UserRq userRq, Long postId) throws IOException {
+        URL url = new URL(properties.getUrl() + "/post/" + postId);
+        return getPost(userRq, url);
+    }
+
     public void deletePost(UserRq userRq, Long postId) throws IOException {
         URL url = new URL(properties.getUrl() + "/post/" + postId);
 
@@ -310,6 +327,40 @@ public class HttpService {
         String token = tokenService.getToken(id);
 
         put(url, token, null);
+    }
+
+    public void readDialog(UserRq userRq, Long dialogId) throws IOException {
+        URL url = new URL(String.format(
+                "%s/dialogs/%d/read",
+                properties.getUrl(),
+                dialogId));
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        put(url, token, null);
+    }
+
+    public List<DialogRs> getDialogs(UserRq userRq) throws IOException {
+        URL url = new URL(properties.getUrl() + "/dialogs");
+        return getDialogs(userRq, url);
+    }
+
+    public List<MessageRs> getUnreadMessages(UserRq userRq, Long dialogId) throws IOException {
+        URL url = new URL(String.format(
+                "%s/dialogs/%d/unread",
+                properties.getUrl(),
+                dialogId));
+        return getMessages(userRq, url);
+    }
+
+    public void createDialog(UserRq userRq, DialogUserShortListRq dialogRq) throws IOException {
+        URL url = new URL(properties.getUrl() + "/dialogs");
+
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        post(url, token, dialogRq);
     }
 
     private PersonRs getPerson(UserRq userRq, URL url) throws IOException {
@@ -335,6 +386,16 @@ public class HttpService {
         );
     }
 
+    private PostRs getPost(UserRq userRq, URL url) throws IOException {
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        String response = get(url, token);
+
+        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
+        return OBJECT_MAPPER.treeToValue(node, PostRs.class);
+    }
+
     private List<PostRs> getPosts(UserRq userRq, URL url) throws IOException {
         Long id = userRq.getUserSession().getId();
         String token = tokenService.getToken(id);
@@ -345,6 +406,32 @@ public class HttpService {
         return OBJECT_MAPPER.readValue(
                 OBJECT_MAPPER.treeAsTokens(node),
                 TypeFactory.defaultInstance().constructCollectionType(List.class, PostRs.class)
+        );
+    }
+
+    private List<DialogRs> getDialogs(UserRq userRq, URL url) throws IOException {
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        String response = get(url, token);
+
+        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
+        return OBJECT_MAPPER.readValue(
+                OBJECT_MAPPER.treeAsTokens(node),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, DialogRs.class)
+        );
+    }
+
+    private List<MessageRs> getMessages(UserRq userRq, URL url) throws IOException {
+        Long id = userRq.getUserSession().getId();
+        String token = tokenService.getToken(id);
+
+        String response = get(url, token);
+
+        JsonNode node = OBJECT_MAPPER.readTree(response).get("data");
+        return OBJECT_MAPPER.readValue(
+                OBJECT_MAPPER.treeAsTokens(node),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, MessageRs.class)
         );
     }
 

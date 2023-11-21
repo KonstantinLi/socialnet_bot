@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.FriendsSession;
@@ -16,11 +15,9 @@ import ru.skillbox.socialnet.zeronebot.service.session.UserSessionService;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.skillbox.socialnet.zeronebot.constant.Friends.PERSON_INFO;
 import static ru.skillbox.socialnet.zeronebot.constant.Navigate.NEXT_PERSON;
 import static ru.skillbox.socialnet.zeronebot.constant.Navigate.PREV_PERSON;
 
@@ -35,45 +32,6 @@ public class PersonService {
 
     @Value("${zerone.page_size}")
     private Integer pageSize;
-
-    public void sendPaginatedFriends(
-            UserRq userRq,
-            List<PersonRs> personList,
-            String prevPage,
-            String nextPage) {
-
-        int page = Optional.ofNullable(userRq.getUserSession().getPage()).orElse(0);
-
-        int start = Math.min(page * pageSize, personList.size());
-        int end = Math.min(start + pageSize, personList.size());
-
-        List<PersonRs> personsPage = personList.subList(start, end);
-
-        if (personsPage.isEmpty()) {
-            telegramService.sendMessage(userRq.getChatId(), "Список завершен");
-            return;
-        }
-
-        InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
-
-        for (PersonRs person : personsPage) {
-            InlineKeyboardButton button =
-                    new InlineKeyboardButton(formatService.caption(person, true));
-            button.setCallbackData(PERSON_INFO + "_" + person.getId());
-            rowsInLine.add(List.of(button));
-        }
-
-        InlineKeyboardMarkup navigate = keyboardService.buildNavigateMenu(prevPage, nextPage);
-        rowsInLine.addAll(navigate.getKeyboard());
-
-        markupInLine.setKeyboard(rowsInLine);
-
-        telegramService.sendMessage(
-                userRq.getChatId(),
-                String.format("(%d-%d)", start + 1, end),
-                markupInLine);
-    }
 
     public void sendPersonDetails(UserRq userRq, PersonRs person) throws IOException {
         InlineKeyboardMarkup markupInLine = keyboardService.buildPersonMenu(person);
@@ -134,7 +92,7 @@ public class PersonService {
             friendsSession.setIndex(Math.min(recommendations.size() - 1, ++index));
         }
 
-        if (index == recommendations.size() - 1) {
+        if (index >= recommendations.size()) {
             friendsSessionService.deleteSession(chatId);
             throw new OutOfListException();
         }

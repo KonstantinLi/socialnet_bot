@@ -3,6 +3,7 @@ package ru.skillbox.socialnet.zeronebot.handler.account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
@@ -37,8 +38,13 @@ public class ProfileHandler extends UserRequestHandler {
         String caption = formatService.caption(personRs, false);
 
         InlineKeyboardMarkup markupInLine = keyboardService.buildProfileMenu(request);
+        ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
+        keyboardRemove.setRemoveKeyboard(true);
 
-        telegramService.sendMessage(chatId, "Вкладка <b>\"Профиль\"</b>");
+        telegramService.sendMessage(
+                chatId,
+                "Вкладка <b>\"Профиль\"</b>",
+                keyboardRemove);
 
         telegramService.sendPhotoURL(
                 chatId,

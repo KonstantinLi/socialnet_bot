@@ -13,3 +13,6 @@ zerone:
 http:
   url: http://localhost:8086/api/v1
   agent: Mozilla/5.0
+
+websocket:
+  url: ws://localhost:8086/api/v1/ws

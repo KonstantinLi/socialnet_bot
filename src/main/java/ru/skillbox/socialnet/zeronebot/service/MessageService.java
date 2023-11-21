@@ -70,6 +70,32 @@ public class MessageService {
         };
     }
 
+    public String dialogs(int count) {
+        if (count == 0) {
+            return "Диалогов не найдено";
+        }
+
+        String numberString = String.valueOf(count);
+        return switch (numberString.charAt(numberString.length() - 1)) {
+            case '1' -> String.format("Найден %s диалог", numberString);
+            case '2', '3', '4' -> String.format("Найдены %s диалога", numberString);
+            default -> String.format("Найдено %s диалогов", numberString);
+        };
+    }
+
+    public String unreadMessages(int count) {
+        if (count == 0) {
+            return "Нету непрочитанных сообщений";
+        }
+
+        String numberString = String.valueOf(count);
+        return switch (numberString.charAt(numberString.length() - 1)) {
+            case '1' -> String.format("%s непрочитанное сообщение", numberString);
+            case '2', '3', '4' -> String.format("%s непрочитанных сообщения", numberString);
+            default -> String.format("%s непрочитанных сообщений", numberString);
+        };
+    }
+
     public Long getIdFromCallback(UserRq request, String callback) {
         return Long.valueOf(request.getUpdate()
                 .getCallbackQuery()

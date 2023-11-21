@@ -53,7 +53,7 @@ public class FriendsListHandler extends UserRequestHandler {
             return;
         }
 
-        personService.sendPaginatedFriends(
+        friendsService.sendPaginatedFriends(
                 request,
                 friends,
                 PREV_PAGE_FRIENDS,

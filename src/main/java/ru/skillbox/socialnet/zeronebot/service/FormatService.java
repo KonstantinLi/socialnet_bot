@@ -2,9 +2,7 @@ package ru.skillbox.socialnet.zeronebot.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.skillbox.socialnet.zeronebot.dto.response.CommentRs;
-import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
-import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
+import ru.skillbox.socialnet.zeronebot.dto.response.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,6 +13,8 @@ import java.util.StringJoiner;
 @Service
 @RequiredArgsConstructor
 public class FormatService {
+    private final MessageService messageService;
+
     public String caption(PersonRs personRs, boolean shortInfo) {
         String birthDate = personRs.getBirthDate();
         String country = personRs.getCountry();
@@ -47,9 +47,9 @@ public class FormatService {
 
         builder.append("\n\n");
         if (online == null || !online) {
-            builder.append("\uD83D\uDD34 Не в сети");
+            builder.append("\uD83D\uDD34").append(shortInfo ? "" : " Не в сети");
         } else {
-            builder.append("\uD83D\uDFE2 В сети");
+            builder.append("\uD83D\uDFE2").append(shortInfo ? "" : " В сети");
         }
 
         return builder.toString();
@@ -66,8 +66,6 @@ public class FormatService {
         joiner.add("Автор: " + getPersonName(postRs.getAuthor()));
         joiner.add("");
         joiner.add(postRs.getPostText());
-        joiner.add("");
-        joiner.add(formatDateTime(postRs.getTime(), "yyyy-MM-dd HH:mm:ss.SSSSSS"));
 
         return joiner.toString();
     }
@@ -80,8 +78,38 @@ public class FormatService {
         joiner.add(getPersonName(commentRs.getAuthor()));
         joiner.add("");
         joiner.add(commentRs.getCommentText());
+
+        return joiner.toString();
+    }
+
+    public String formatDialog(DialogRs dialogRs, PersonRs companion) {
+        Long unread = dialogRs.getUnreadCount();
+        MessageRs lastMessage = dialogRs.getLastMessage();
+        Boolean isSendByMe = lastMessage.getIsSentByMe();
+
+        StringJoiner joiner = new StringJoiner("\n");
+        joiner.add(String.format("Диалог с <b>%s</b>", getPersonName(companion)));
+        if (!isSendByMe && unread != null && !unread.equals(0L)) {
+            joiner.add("<i>" + messageService.unreadMessages(unread.intValue()) + "</i>");
+        }
         joiner.add("");
-        joiner.add(formatDateTime(commentRs.getTime(), "yyyy-MM-dd'T'HH:mm:ss"));
+        joiner.add(formatMessage(lastMessage, companion));
+
+        return joiner.toString();
+    }
+
+    public String formatMessage(MessageRs messageRs, PersonRs companion) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        String formatDateTime = formatDateTime(
+                formatter.format(messageRs.getTime()),
+                "yyyy-MM-dd'T'HH:mm:ss.SSS");
+        Boolean sendByMe = messageRs.getIsSentByMe();
+
+        StringJoiner joiner = new StringJoiner("\n");
+        joiner.add("<b>" + (sendByMe ? "Вы" : getPersonName(companion)) +
+                "</b>: " + messageRs.getMessageText());
+        joiner.add("");
+        joiner.add(formatDateTime);
 
         return joiner.toString();
     }

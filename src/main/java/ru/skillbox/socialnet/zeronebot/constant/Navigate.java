@@ -13,6 +13,9 @@ public class Navigate {
     public static final String PREV_PERSON = "/prev_person";
     public static final String NEXT_PERSON = "/next_person";
 
+    public static final String PREV_DIALOG = "/prev_dialog";
+    public static final String NEXT_DIALOG = "/next_dialog";
+
     public static final String PREV_POST = "/prev_post";
     public static final String NEXT_POST = "/next_post";
 

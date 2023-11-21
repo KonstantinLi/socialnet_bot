@@ -22,15 +22,17 @@ public class BlockUserHandler extends UserRequestHandler {
 
     @Override
     public boolean isApplicable(UserRq request) {
-        return isCallbackStartsWith(request.getUpdate(), BLOCK) ||
-                isCallbackStartsWith(request.getUpdate(), UNBLOCK);
+        return isCallbackStartsWith(request.getUpdate(), BLOCK.getCommand()) ||
+                isCallbackStartsWith(request.getUpdate(), UNBLOCK.getCommand());
     }
 
     @Override
     public void handle(UserRq request) throws IOException {
-        boolean blocking = isCallbackStartsWith(request.getUpdate(), BLOCK);
+        boolean blocking = isCallbackStartsWith(request.getUpdate(), BLOCK.getCommand());
 
-        Long id = messageService.getIdFromCallback(request, blocking ? BLOCK : UNBLOCK);
+        Long id = messageService.getIdFromCallback(
+                request,
+                blocking ? BLOCK.getCommand() : UNBLOCK.getCommand());
         httpService.blockUser(request, id);
 
         telegramService.sendMessage(

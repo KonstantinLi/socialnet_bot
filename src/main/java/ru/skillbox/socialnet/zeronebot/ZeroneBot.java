@@ -23,6 +23,7 @@ public class ZeroneBot extends TelegramLongPollingBot {
     private final UserSessionService userSessionService;
     private final PostSessionService postSessionService;
     private final LoginSessionService loginSessionService;
+    private final DialogSessionService dialogSessionService;
     private final CommentSessionService commentSessionService;
     private final RegisterSessionService registerSessionService;
     private final FriendsSessionService friendsSessionService;
@@ -36,6 +37,7 @@ public class ZeroneBot extends TelegramLongPollingBot {
             UserSessionService userSessionService,
             PostSessionService postSessionService,
             LoginSessionService loginSessionService,
+            DialogSessionService dialogSessionService,
             CommentSessionService commentSessionService,
             RegisterSessionService registerSessionService,
             FriendsSessionService friendsSessionService,
@@ -46,6 +48,7 @@ public class ZeroneBot extends TelegramLongPollingBot {
         this.userSessionService = userSessionService;
         this.postSessionService = postSessionService;
         this.loginSessionService = loginSessionService;
+        this.dialogSessionService = dialogSessionService;
         this.commentSessionService = commentSessionService;
         this.registerSessionService = registerSessionService;
         this.friendsSessionService = friendsSessionService;
@@ -80,6 +83,7 @@ public class ZeroneBot extends TelegramLongPollingBot {
 
             UserSession userSession = userSessionService.getSession(chatId);
             LoginSession loginSession = loginSessionService.getSession(chatId);
+            DialogSession dialogSession = dialogSessionService.getSession(chatId);
             CommentSession commentSession = commentSessionService.getSession(chatId);
             RegisterSession registerSession = registerSessionService.getSession(chatId);
             FriendsSession friendsSession = friendsSessionService.getSession(chatId);
@@ -92,6 +96,7 @@ public class ZeroneBot extends TelegramLongPollingBot {
                     .userSession(userSession)
                     .postSession(postSession)
                     .loginSession(loginSession)
+                    .dialogSession(dialogSession)
                     .commentSession(commentSession)
                     .registerSession(registerSession)
                     .friendsSession(friendsSession)

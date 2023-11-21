@@ -12,7 +12,7 @@ import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 import ru.skillbox.socialnet.zeronebot.service.HttpService;
 import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
-import ru.skillbox.socialnet.zeronebot.service.session.UserSessionService;
+import ru.skillbox.socialnet.zeronebot.service.session.*;
 
 import java.io.IOException;
 
@@ -20,10 +20,17 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class LogoutHandler extends UserRequestHandler {
     private final HttpService httpService;
-    private final TelegramService telegramService;
-    private final UserSessionService userSessionService;
-
     private final KeyboardService keyboardService;
+    private final TelegramService telegramService;
+
+    private final PostSessionService postSessionService;
+    private final UserSessionService userSessionService;
+    private final LoginSessionService loginSessionService;
+    private final DialogSessionService dialogSessionService;
+    private final FilterSessionService filterSessionService;
+    private final CommentSessionService commentSessionService;
+    private final FriendsSessionService friendsSessionService;
+    private final RegisterSessionService registerSessionService;
 
     @Override
     public boolean isApplicable(UserRq request) {
@@ -53,6 +60,14 @@ public class LogoutHandler extends UserRequestHandler {
         session.setSessionState(SessionState.UNAUTHORIZED);
         session.setId(null);
         userSessionService.saveSession(chatId, session);
+
+        postSessionService.deleteSession(chatId);
+        loginSessionService.deleteSession(chatId);
+        dialogSessionService.deleteSession(chatId);
+        filterSessionService.deleteSession(chatId);
+        commentSessionService.deleteSession(chatId);
+        friendsSessionService.deleteSession(chatId);
+        registerSessionService.deleteSession(chatId);
     }
 
     @Override

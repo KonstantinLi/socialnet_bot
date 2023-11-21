@@ -51,7 +51,7 @@ public class LikeCommentHandler extends UserRequestHandler {
             return;
         }
 
-        PostRs post = postService.getPostById(postSession.getPosts(), postId);
+        PostRs post = postService.getPostById(request, postSession.getPosts(), postId);
         List<CommentRs> comments = post.getComments();
         int size;
 

@@ -3,6 +3,7 @@ package ru.skillbox.socialnet.zeronebot.handler.comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CommentRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
@@ -10,10 +11,7 @@ import ru.skillbox.socialnet.zeronebot.dto.session.CommentSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.PostSession;
 import ru.skillbox.socialnet.zeronebot.dto.session.UserSession;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
-import ru.skillbox.socialnet.zeronebot.service.CommentService;
-import ru.skillbox.socialnet.zeronebot.service.MessageService;
-import ru.skillbox.socialnet.zeronebot.service.PostService;
-import ru.skillbox.socialnet.zeronebot.service.TelegramService;
+import ru.skillbox.socialnet.zeronebot.service.*;
 import ru.skillbox.socialnet.zeronebot.service.session.CommentSessionService;
 
 import java.io.IOException;
@@ -30,6 +28,7 @@ public class CommentHandler extends UserRequestHandler {
     private final PostService postService;
     private final CommentService commentService;
     private final MessageService messageService;
+    private final KeyboardService keyboardService;
     private final TelegramService telegramService;
     private final CommentSessionService commentSessionService;
 
@@ -51,27 +50,32 @@ public class CommentHandler extends UserRequestHandler {
         PostSession postSession = request.getPostSession();
         UserSession userSession = request.getUserSession();
 
+
         Long postId = isCallbackStartsWith(update, COMMENT.getCommand()) ?
                 messageService.getIdFromCallback(request, COMMENT.getCommand()) :
                 commentSession.getPostId();
 
-        PostRs post = postService.getPostById(postSession.getPosts(), postId);
+        PostRs post = postService.getPostById(request, postSession.getPosts(), postId);
 
         List<CommentRs> comments = post.getComments()
                 .stream()
                 .sorted(commentService.commentComparator(userSession.getId()))
                 .toList();
 
+        InlineKeyboardMarkup markupInLine = keyboardService.buildPostCommentAddMenu(post);
+
         if (comments.isEmpty()) {
             telegramService.sendMessage(
                     chatId,
-                    "<b>Комментарии отсутствуют</b>");
+                    "<b>Комментарии отсутствуют</b>",
+                    markupInLine);
             return;
 
         } else if (isCallbackStartsWith(update, COMMENT.getCommand())) {
             telegramService.sendMessage(
                     chatId,
-                    "<b>Комментарии к посту</b>");
+                    "<b>Комментарии к посту</b>",
+                    markupInLine);
             commentSession.setIndex(0);
             commentSession.setPostId(postId);
 

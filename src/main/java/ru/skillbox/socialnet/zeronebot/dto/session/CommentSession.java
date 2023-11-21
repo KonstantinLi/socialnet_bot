@@ -2,6 +2,7 @@ package ru.skillbox.socialnet.zeronebot.dto.session;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.skillbox.socialnet.zeronebot.dto.enums.state.CommentState;
 import ru.skillbox.socialnet.zeronebot.dto.request.CommentRq;
 
 @Data
@@ -13,5 +14,5 @@ public class CommentSession {
     private Integer index;
     private Integer subIndex;
     private CommentRq comment;
-    private boolean isEditing;
+    private CommentState commentState;
 }

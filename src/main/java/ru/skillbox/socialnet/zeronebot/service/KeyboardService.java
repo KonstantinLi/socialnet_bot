@@ -6,10 +6,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.skillbox.socialnet.zeronebot.constant.Common;
+import ru.skillbox.socialnet.zeronebot.constant.Dialog;
 import ru.skillbox.socialnet.zeronebot.constant.Filter;
 import ru.skillbox.socialnet.zeronebot.dto.enums.FriendShipStatus;
+import ru.skillbox.socialnet.zeronebot.dto.enums.ReadStatus;
 import ru.skillbox.socialnet.zeronebot.dto.request.UserRq;
 import ru.skillbox.socialnet.zeronebot.dto.response.CommentRs;
+import ru.skillbox.socialnet.zeronebot.dto.response.DialogRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PersonRs;
 import ru.skillbox.socialnet.zeronebot.dto.response.PostRs;
 import ru.skillbox.socialnet.zeronebot.dto.session.FilterSession;
@@ -107,11 +110,13 @@ public class KeyboardService {
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
 
-        InlineKeyboardButton wallButton = new InlineKeyboardButton();
-        wallButton.setText(WALL.getText());
+        InlineKeyboardButton postButton = new InlineKeyboardButton(POST_ADD.getText());
+        postButton.setCallbackData(POST_ADD.getCommand());
+
+        InlineKeyboardButton wallButton = new InlineKeyboardButton(WALL.getText());
         wallButton.setCallbackData(WALL.getCommand() + "_" + id);
 
-        rowsInLine.add(List.of(wallButton));
+        rowsInLine.add(List.of(postButton, wallButton));
 
         markupInLine.setKeyboard(rowsInLine);
         return markupInLine;
@@ -179,6 +184,14 @@ public class KeyboardService {
         return markupInLine;
     }
 
+    public InlineKeyboardMarkup buildDialogMenuNavigate(DialogRs dialogRs) {
+        InlineKeyboardMarkup markupInLine = buildDialogMenu(dialogRs);
+        List<List<InlineKeyboardButton>> rowsInLine = markupInLine.getKeyboard();
+        rowsInLine.addAll(buildNavigateMenu(PREV_DIALOG, NEXT_DIALOG).getKeyboard());
+
+        return markupInLine;
+    }
+
     public InlineKeyboardMarkup buildCommentMenu(
             CommentRs commentRs,
             Long authorId,
@@ -236,6 +249,36 @@ public class KeyboardService {
         }
 
         markupInLine.setKeyboard(rowsInLine);
+        return markupInLine;
+    }
+
+    public InlineKeyboardMarkup buildPostCommentAddMenu(PostRs postRs) {
+        Long id = postRs.getId();
+
+        InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+
+        InlineKeyboardButton addCommentButton = new InlineKeyboardButton(COMMENT_ADD.getText());
+        addCommentButton.setCallbackData(COMMENT_ADD.getCommand() + "_" + id);
+
+        rowsInLine.add(List.of(addCommentButton));
+        markupInLine.setKeyboard(rowsInLine);
+
+        return markupInLine;
+    }
+
+    public InlineKeyboardMarkup buildCommentCommentAddMenu(CommentRs commentRs) {
+        Long id = commentRs.getId();
+
+        InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+
+        InlineKeyboardButton addCommentButton = new InlineKeyboardButton(COMMENT_COMMENT_ADD.getText());
+        addCommentButton.setCallbackData(COMMENT_COMMENT_ADD.getCommand() + "_" + id);
+
+        rowsInLine.add(List.of(addCommentButton));
+        markupInLine.setKeyboard(rowsInLine);
+
         return markupInLine;
     }
 
@@ -298,8 +341,8 @@ public class KeyboardService {
         String friendshipStatus = person.getFriendStatus();
 
         if (!FriendShipStatus.BLOCKED.toString().equals(friendshipStatus)) {
-            InlineKeyboardButton messageButton = new InlineKeyboardButton(MESSAGE);
-            messageButton.setCallbackData(MESSAGE + "_" + id);
+            InlineKeyboardButton messageButton = new InlineKeyboardButton(MESSAGE.getText());
+            messageButton.setCallbackData(MESSAGE.getCommand() + "_" + id);
             row1.add(messageButton);
 
             InlineKeyboardButton wallButton = new InlineKeyboardButton(WALL.getText());
@@ -309,36 +352,36 @@ public class KeyboardService {
             InlineKeyboardButton friendButton;
 
             if (FriendShipStatus.FRIEND.toString().equals(friendshipStatus)) {
-                friendButton = new InlineKeyboardButton(DELETE);
-                friendButton.setCallbackData(DELETE + "_" + id);
+                friendButton = new InlineKeyboardButton(DELETE.getText());
+                friendButton.setCallbackData(DELETE.getCommand() + "_" + id);
 
             } else if (FriendShipStatus.UNKNOWN.toString().equals(friendshipStatus)) {
-                friendButton = new InlineKeyboardButton(ADD);
-                friendButton.setCallbackData(ADD + "_" + id);
+                friendButton = new InlineKeyboardButton(ADD.getText());
+                friendButton.setCallbackData(ADD.getCommand() + "_" + id);
 
             } else if (FriendShipStatus.REQUEST.toString().equals(friendshipStatus)) {
-                friendButton = new InlineKeyboardButton(CANCEL);
-                friendButton.setCallbackData(CANCEL + "_" + id);
+                friendButton = new InlineKeyboardButton(CANCEL.getText());
+                friendButton.setCallbackData(CANCEL.getCommand() + "_" + id);
 
             } else {
-                friendButton = new InlineKeyboardButton(CONFIRM);
-                InlineKeyboardButton rejectButton = new InlineKeyboardButton(DECLINE);
+                friendButton = new InlineKeyboardButton(CONFIRM.getText());
+                InlineKeyboardButton rejectButton = new InlineKeyboardButton(DECLINE.getText());
 
-                friendButton.setCallbackData(CONFIRM + "_" + id);
-                rejectButton.setCallbackData(DECLINE + "_" + id);
+                friendButton.setCallbackData(CONFIRM.getCommand() + "_" + id);
+                rejectButton.setCallbackData(DECLINE.getCommand() + "_" + id);
 
                 row2.add(rejectButton);
             }
 
             row2.add(friendButton);
 
-            InlineKeyboardButton block = new InlineKeyboardButton(BLOCK);
-            block.setCallbackData(BLOCK + "_" + id);
+            InlineKeyboardButton block = new InlineKeyboardButton(BLOCK.getText());
+            block.setCallbackData(BLOCK.getCommand() + "_" + id);
             row2.add(block);
 
         } else {
-            InlineKeyboardButton unblock = new InlineKeyboardButton(UNBLOCK);
-            unblock.setCallbackData(UNBLOCK + "_" + id);
+            InlineKeyboardButton unblock = new InlineKeyboardButton(UNBLOCK.getText());
+            unblock.setCallbackData(UNBLOCK.getCommand() + "_" + id);
             row2.add(unblock);
         }
 
@@ -347,6 +390,39 @@ public class KeyboardService {
 
         markupInLine.setKeyboard(rowsInLine);
         return markupInLine;
+    }
+
+    public InlineKeyboardMarkup buildDialogMenu(DialogRs dialogRs) {
+        InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        InlineKeyboardButton messageButton = new InlineKeyboardButton(Dialog.MESSAGE.getText());
+        messageButton.setCallbackData(Dialog.MESSAGE.getCommand() + "_" + dialogRs.getId());
+        row.add(messageButton);
+
+        if (!dialogRs.getLastMessage().getIsSentByMe() && dialogRs.getReadStatus() == ReadStatus.UNREAD) {
+            InlineKeyboardButton readButton = new InlineKeyboardButton(Dialog.READ.getText());
+            readButton.setCallbackData(Dialog.READ.getCommand() + "_" + dialogRs.getId());
+            row.add(readButton);
+        }
+
+        keyboard.add(row);
+        markupInLine.setKeyboard(keyboard);
+
+        return markupInLine;
+    }
+
+    public ReplyKeyboardMarkup buildOpenedDialogMenu() {
+        KeyboardRow row = new KeyboardRow();
+        row.add(Dialog.CLOSE.getText());
+
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row))
+                .selective(true)
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(false)
+                .build();
     }
 
     public ReplyKeyboardMarkup buildTagsMenu() {
