@@ -107,7 +107,6 @@ public class ExceptionAspect {
 
         } catch (IllegalFilterException | OutOfListException ex) {
             telegramService.sendMessage(chatId, ex.getMessage());
-            log.error(ex.getMessage());
 
         } catch (Throwable ex) {
             ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();

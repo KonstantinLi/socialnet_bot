@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="ConsoleAppender">
+            <ThresholdFilter level="ALL"/>
+            <PatternLayout disableAnsi="false"
+                           pattern="%highlight{%d %-5p [%t] %c{10} - %m%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=snow, DEBUG=cyan, TRACE=blue}"/>
+        </Console>
+
+        <RollingFile name="ErrorFileAppender"
+                     fileName="./logs/errors.log"
+                     filePattern="./logs/$${date:yyyy-MM}/errors-%d{dd-MMMM-yyyy}-%i.log.gz">
+            <PatternLayout pattern="%d %-5p [%t] %c{10} - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="ru.skillbox.socialnet" level="info" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+        <Root level="error">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="ErrorFileAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
