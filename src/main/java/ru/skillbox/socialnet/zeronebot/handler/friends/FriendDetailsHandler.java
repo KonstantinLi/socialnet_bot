@@ -26,7 +26,7 @@ public class FriendDetailsHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long id = messageService.getIdFromCallback(request, PERSON_INFO);
         PersonRs personRs = httpService.getPersonById(request, id);
         personService.sendPersonDetails(request, personRs);

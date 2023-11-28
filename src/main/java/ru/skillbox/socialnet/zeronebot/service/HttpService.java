@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnet.zeronebot.config.HttpProperties;
 import ru.skillbox.socialnet.zeronebot.dto.request.*;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class HttpService {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -492,7 +490,6 @@ public class HttpService {
             connection.connect();
             return response(connection.getInputStream());
         } catch (IOException ex) {
-            log.error(ex.getMessage());
             String error = response(connection.getErrorStream());
             JsonNode node = OBJECT_MAPPER.readTree(error);
             ErrorRs errorRs = OBJECT_MAPPER.treeToValue(node, ErrorRs.class);

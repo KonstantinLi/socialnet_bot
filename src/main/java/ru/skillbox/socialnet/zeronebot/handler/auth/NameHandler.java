@@ -29,7 +29,7 @@ public class NameHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long chatId = request.getChatId();
         String name = request.getUpdate().getMessage().getText().trim();
 

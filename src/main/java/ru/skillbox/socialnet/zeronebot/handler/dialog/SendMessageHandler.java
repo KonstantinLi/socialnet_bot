@@ -25,7 +25,7 @@ public class SendMessageHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long userId = request.getUserSession().getId();
 
         DialogSession dialogSession = request.getDialogSession();

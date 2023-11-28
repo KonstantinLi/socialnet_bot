@@ -24,7 +24,7 @@ public class FriendsHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         ReplyKeyboardMarkup replyKeyboardMarkup = keyboardService.buildFriendsMenu();
         telegramService.sendMessage(
                 request.getChatId(),

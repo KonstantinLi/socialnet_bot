@@ -27,7 +27,7 @@ public class BlockUserHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         boolean blocking = isCallbackStartsWith(request.getUpdate(), BLOCK.getCommand());
 
         Long id = messageService.getIdFromCallback(

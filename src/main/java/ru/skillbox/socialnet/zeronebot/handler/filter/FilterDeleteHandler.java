@@ -28,7 +28,7 @@ public class FilterDeleteHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long chatId = request.getChatId();
 
         if (request.getFilterSession().getFilterState() != FilterState.FILTERED) {

@@ -31,7 +31,7 @@ public class FilterHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Update update = request.getUpdate();
         FilterSession filterSession = request.getFilterSession();
 

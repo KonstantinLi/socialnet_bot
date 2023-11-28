@@ -13,7 +13,6 @@ import ru.skillbox.socialnet.zeronebot.exception.OutOfListException;
 import ru.skillbox.socialnet.zeronebot.service.session.FriendsSessionService;
 import ru.skillbox.socialnet.zeronebot.service.session.UserSessionService;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +32,7 @@ public class PersonService {
     @Value("${zerone.page_size}")
     private Integer pageSize;
 
-    public void sendPersonDetails(SessionRq sessionRq, PersonRs person) throws IOException {
+    public void sendPersonDetails(SessionRq sessionRq, PersonRs person) {
         Long chatId = sessionRq.getChatId();
         String caption = formatService.caption(person, false);
         InlineKeyboardMarkup markupInLine = keyboardService.buildPersonMenu(person);
@@ -45,7 +44,7 @@ public class PersonService {
         }
     }
 
-    public void sendPersonDetailsNavigate(SessionRq sessionRq, PersonRs person) throws IOException {
+    public void sendPersonDetailsNavigate(SessionRq sessionRq, PersonRs person) {
         Long chatId = sessionRq.getChatId();
         String caption = formatService.caption(person, false);
         InlineKeyboardMarkup markupInLine = keyboardService.buildPersonMenuNavigate(person);

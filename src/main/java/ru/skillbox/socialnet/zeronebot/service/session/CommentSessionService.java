@@ -3,7 +3,6 @@ package ru.skillbox.socialnet.zeronebot.service.session;
 import org.springframework.stereotype.Component;
 import ru.skillbox.socialnet.zeronebot.dto.session.CommentSession;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

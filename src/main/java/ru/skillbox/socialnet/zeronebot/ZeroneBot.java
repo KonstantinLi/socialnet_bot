@@ -14,7 +14,6 @@ import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.dto.session.*;
 import ru.skillbox.socialnet.zeronebot.service.session.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,9 +110,7 @@ public class ZeroneBot extends TelegramLongPollingBot {
 
             try {
                 dispatcher.dispatch(sessionRq);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            } catch (Exception ex) {}
         }
     }
 

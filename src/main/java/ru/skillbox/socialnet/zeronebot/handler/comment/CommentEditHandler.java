@@ -28,7 +28,7 @@ public class CommentEditHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         if (request.getCommentSession().getPostId() == null) {
             return;
         }

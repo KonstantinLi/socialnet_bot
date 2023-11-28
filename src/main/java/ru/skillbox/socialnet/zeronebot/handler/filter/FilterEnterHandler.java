@@ -32,7 +32,7 @@ public class FilterEnterHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long chatId = request.getChatId();
         String message = request.getUpdate().getMessage().getText();
 

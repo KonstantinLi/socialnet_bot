@@ -1,7 +1,6 @@
 package ru.skillbox.socialnet.zeronebot.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class WebSocketService {
     private final TokenService tokenService;
@@ -53,7 +51,6 @@ public class WebSocketService {
         try {
             return stompClient.connect(url, handshakeHeaders, connectHeaders, stompHandler).get();
         } catch (InterruptedException | ExecutionException ex) {
-            log.error(ex.getMessage());
             throw new RuntimeException(ex);
         }
     }

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.skillbox.socialnet.zeronebot.dto.request.SessionRq;
 import ru.skillbox.socialnet.zeronebot.handler.UserRequestHandler;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class Dispatcher {
                 .toList();
     }
 
-    public void dispatch(SessionRq sessionRq) throws IOException {
+    public void dispatch(SessionRq sessionRq) throws Exception {
         for (UserRequestHandler userRequestHandler : handlers) {
             if (userRequestHandler.isApplicable(sessionRq)) {
                 userRequestHandler.handle(sessionRq);

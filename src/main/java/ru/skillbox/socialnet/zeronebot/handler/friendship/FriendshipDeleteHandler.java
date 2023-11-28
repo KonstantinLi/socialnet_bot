@@ -25,7 +25,7 @@ public class FriendshipDeleteHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long id = messageService.getIdFromCallback(request, DELETE.getCommand());
         httpService.deleteFriend(request, id);
 

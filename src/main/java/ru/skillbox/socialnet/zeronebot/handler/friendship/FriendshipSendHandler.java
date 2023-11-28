@@ -25,7 +25,7 @@ public class FriendshipSendHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long id = messageService.getIdFromCallback(request, ADD.getCommand());
         httpService.sendFriendship(request, id);
 

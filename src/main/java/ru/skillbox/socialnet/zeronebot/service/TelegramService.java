@@ -1,7 +1,6 @@
 package ru.skillbox.socialnet.zeronebot.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -18,7 +17,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
 public class TelegramService {
     private final ZeroneBotSender botSender;
@@ -42,7 +40,7 @@ public class TelegramService {
         try {
             botSender.execute(sendMessage);
         } catch (TelegramApiException ex) {
-            log.error(ex.getMessage());
+            throw new RuntimeException(ex);
         }
     }
 
@@ -52,18 +50,17 @@ public class TelegramService {
             String caption,
             ReplyKeyboard replyKeyboard) {
 
+        SendPhoto sendPhoto = new SendPhoto();
+
+        sendPhoto.setChatId(chatId.toString());
+        sendPhoto.setCaption(caption);
+        sendPhoto.setReplyMarkup(replyKeyboard);
+        sendPhoto.setPhoto(new InputFile(url.toString()));
+
         try {
-            SendPhoto sendPhoto = new SendPhoto();
-
-            sendPhoto.setChatId(chatId.toString());
-            sendPhoto.setCaption(caption);
-            sendPhoto.setReplyMarkup(replyKeyboard);
-            sendPhoto.setPhoto(new InputFile(url.toString()));
-
             botSender.execute(sendPhoto);
-
         } catch (TelegramApiException ex) {
-            log.error(ex.getMessage());
+            throw new RuntimeException(ex);
         }
     }
 
@@ -74,20 +71,19 @@ public class TelegramService {
             String caption,
             ReplyKeyboard replyKeyboard) {
 
+        InputStream photoStream = new ByteArrayInputStream(bytes);
+
+        SendPhoto sendPhoto = new SendPhoto();
+
+        sendPhoto.setChatId(chatId.toString());
+        sendPhoto.setCaption(caption);
+        sendPhoto.setReplyMarkup(replyKeyboard);
+        sendPhoto.setPhoto(new InputFile(photoStream, fileName));
+
         try {
-            InputStream photoStream = new ByteArrayInputStream(bytes);
-
-            SendPhoto sendPhoto = new SendPhoto();
-
-            sendPhoto.setChatId(chatId.toString());
-            sendPhoto.setCaption(caption);
-            sendPhoto.setReplyMarkup(replyKeyboard);
-            sendPhoto.setPhoto(new InputFile(photoStream, fileName));
-
             botSender.execute(sendPhoto);
-
         } catch (TelegramApiException ex) {
-            log.error(ex.getMessage());
+            throw new RuntimeException(ex);
         }
     }
 }

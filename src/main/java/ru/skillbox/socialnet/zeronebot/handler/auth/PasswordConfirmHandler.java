@@ -14,7 +14,6 @@ import ru.skillbox.socialnet.zeronebot.service.KeyboardService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.RegisterSessionService;
 
-import java.io.IOException;
 import java.util.Base64;
 
 @Component
@@ -34,7 +33,7 @@ public class PasswordConfirmHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long chatId = request.getChatId();
         String passwordConfirm = request.getUpdate().getMessage().getText().trim();
 

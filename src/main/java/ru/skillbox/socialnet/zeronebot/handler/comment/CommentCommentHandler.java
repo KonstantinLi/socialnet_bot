@@ -41,7 +41,7 @@ public class CommentCommentHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long id = request.getUserSession().getId();
         Long chatId = request.getChatId();
         Update update = request.getUpdate();

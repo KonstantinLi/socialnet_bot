@@ -33,7 +33,7 @@ public class PostTagsHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long chatId = request.getChatId();
         PostSession postSession = request.getPostSession();
 

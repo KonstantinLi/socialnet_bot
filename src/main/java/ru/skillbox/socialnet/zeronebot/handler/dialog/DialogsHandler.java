@@ -35,7 +35,7 @@ public class DialogsHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long id = request.getUserSession().getId();
         Update update = request.getUpdate();
         DialogSession dialogSession = request.getDialogSession();

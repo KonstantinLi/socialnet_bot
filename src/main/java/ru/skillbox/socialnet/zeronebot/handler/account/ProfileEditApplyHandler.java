@@ -11,8 +11,6 @@ import ru.skillbox.socialnet.zeronebot.service.HttpService;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 import ru.skillbox.socialnet.zeronebot.service.session.EditSessionService;
 
-import java.io.IOException;
-
 @Component
 @RequiredArgsConstructor
 public class ProfileEditApplyHandler extends UserRequestHandler {
@@ -27,7 +25,7 @@ public class ProfileEditApplyHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long chatId = request.getChatId();
         EditRq editRq = request.getEditSession().getEditRq();
 

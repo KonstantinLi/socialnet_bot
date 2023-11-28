@@ -25,7 +25,7 @@ public class FriendshipCancelHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) throws IOException {
+    public void handle(SessionRq request) throws Exception {
         Long id = messageService.getIdFromCallback(request, CANCEL.getCommand());
         httpService.declineFriendship(request, id);
 

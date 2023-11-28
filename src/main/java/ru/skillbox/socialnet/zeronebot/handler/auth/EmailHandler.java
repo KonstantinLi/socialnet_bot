@@ -34,7 +34,7 @@ public class EmailHandler extends UserRequestHandler {
     }
 
     @Override
-    public void handle(SessionRq request) {
+    public void handle(SessionRq request) throws Exception{
         Long chatId = request.getChatId();
 
         LoginSession loginSession = request.getLoginSession();

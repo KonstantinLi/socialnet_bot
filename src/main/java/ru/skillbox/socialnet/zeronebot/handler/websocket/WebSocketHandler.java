@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -12,10 +11,8 @@ import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import ru.skillbox.socialnet.zeronebot.dto.websocket.MessageWs;
 import ru.skillbox.socialnet.zeronebot.service.TelegramService;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 
-@Slf4j
 public class WebSocketHandler implements StompSessionHandler {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -45,7 +42,6 @@ public class WebSocketHandler implements StompSessionHandler {
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
         String subscribe = String.format("/user/%d/queue/messages", dialogId);
         session.subscribe(subscribe, this);
-        log.info(String.format("Websocket \"%s\" connected", subscribe));
     }
 
     @Override
@@ -77,8 +73,8 @@ public class WebSocketHandler implements StompSessionHandler {
                 throw new IllegalArgumentException("Unknown message type");
             }
 
-        } catch (IOException ex) {
-            log.error(ex.getMessage());
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 }

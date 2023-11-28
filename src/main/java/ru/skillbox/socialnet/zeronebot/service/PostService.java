@@ -22,7 +22,6 @@ import static ru.skillbox.socialnet.zeronebot.constant.Like.LIKE_POST;
 import static ru.skillbox.socialnet.zeronebot.constant.Like.UNLIKE_POST;
 import static ru.skillbox.socialnet.zeronebot.constant.Navigate.*;
 
-
 @Service
 @RequiredArgsConstructor
 public class PostService {
