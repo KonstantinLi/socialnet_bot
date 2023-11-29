@@ -2,6 +2,7 @@ package ru.skillbox.socialnet.zeronebot.aspect;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -92,7 +93,12 @@ public class LoggingAspect {
                 registerSessionService.deleteSession(chatId);
             }
 
-            log.error("Исключение в {}.{}(chatId={}): {}", declaringType, method, chatId, ex.getMessage());
+            String message = ExceptionUtils.getMessage(ex);
+            if (message.isEmpty()) {
+                message = ExceptionUtils.getRootCauseMessage(ex);
+            }
+
+            log.error("Исключение в {}.{}(chatId={}): {}", declaringType, method, chatId, message);
         }
 
         return null;
@@ -136,6 +142,11 @@ public class LoggingAspect {
             registerSessionService.deleteSession(chatId);
         }
 
-        log.error("Исключение в {}.{}(chatId={}): {}", declaringType, method, chatId, ex.getMessage());
+        String message = ExceptionUtils.getMessage(ex);
+        if (message.isEmpty()) {
+            message = ExceptionUtils.getRootCauseMessage(ex);
+        }
+
+        log.error("Исключение в {}.{}(chatId={}): {}", declaringType, method, chatId, message);
     }
 }
