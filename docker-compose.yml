@@ -13,10 +13,7 @@ services:
     restart: always
     ports:
       - "8082:8082"
-    environment:
-      BACKEND_HOST: "217.107.219.242"
-      BACKEND_PORT: "8086"
-      SPRING_REDIS_HOST: "redis"
-      SPRING_REDIS_PORT: "6379"
+    env_file:
+      - ./config/.env
     depends_on:
       - redis
